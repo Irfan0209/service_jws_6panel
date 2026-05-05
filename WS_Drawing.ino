@@ -3,7 +3,7 @@
 char * const pasar[]  = {"WAGE", "KLIWON", "LEGI", "PAHING", "PON"}; 
 char * const Hari[]  = {"MINGGU","SENIN","SELASA","RABU","KAMIS","JUM'AT","SABTU"};
 //const char * const bulanMasehi[] PROGMEM = {"JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" };
-char* jadwal[] = {"IMSAK","SUBUH", "TERBT", "DUHUR", "ASHAR", "MAGRB", "ISYA'"};
+char* jadwal[] = {"IMSAK","SUBUH", "TERBIT","DHUHA", "DZUHUR", "ASHAR", "MAGRIB", "ISYA'"};
 char* jadwalAzzan[] = {"SUBUH","DZUHUR", "ASHAR", "MAGRIB", "ISYA'"};
 char * namaBulanHijriah[] = {
     "MUHARRAM", "SHAFAR", "RABIUL AWAL",
@@ -130,7 +130,7 @@ void drawSholatFrame(uint8_t sNum, int8_t x) {
   fType(1);
   Disp.drawText(33, x, jadwal[sNum]);
   Disp.drawText(65, x, timeBuf);
-
+DoSwap = true;
 }
 
 
@@ -311,6 +311,138 @@ void animasi2(){
         DoSwap = true;
       }
 }
+
+void animasi3(){
+  
+}
+//=======================
+void drawJadwalSholat() {
+  if(adzan) return;
+  
+  RtcDateTime now = Rtc.GetDateTime();
+  static int y = 0, y1 = 0;
+  static uint8_t s = 0, s1 = 0;
+  static bool run = false;
+  static uint8_t pairIdx = 0; // 0:Imsak-Subuh, 1:Terbit-Dhuha, dst
+
+  static uint8_t list = 0;
+  static uint32_t lsRn_y1 = 0;
+  static uint32_t lsRn_y = 0;
+  static uint32_t tHold = 0;
+
+  uint32_t Tmr = millis();
+
+  // Setiap pairIdx mengambil data: n (jadwal pertama) dan n+1 (jadwal kedua)
+  uint8_t idx1 = pairIdx * 2;
+  uint8_t idx2 = (pairIdx * 2) + 1;
+
+  float time1 = getJWSValue(idx1);
+  float time2 = getJWSValue(idx2);
+
+  int8_t drawY = y1 - 17;
+  // Transisi vertikal y1 (jam muncul/hilang)
+  if ((Tmr - lsRn_y1) > 55) {
+    lsRn_y1 = Tmr;
+
+    if (s1 == 0 && y1 < 17) { y1++; }
+    else if (s1 == 1 && y1 > 0) { y1--; }
+  }
+
+  // Saat y1 selesai muncul, mulai animasi jadwal
+  if (y1 == 17 && s1 == 0) {
+    run = true; 
+    if(now.Second() % 2 ){
+      Disp.drawCircle(15,drawY + 4,1,1);
+      Disp.drawCircle(15,drawY + 11,1,1);
+    }else{
+      Disp.drawCircle(15,drawY + 4,1,0);
+      Disp.drawCircle(15,drawY + 11,1,0);
+    }
+  }
+
+  // Animasi gerakan teks (y)
+  if (run && (Tmr - lsRn_y) > 55) {
+    lsRn_y = Tmr;
+
+    if (s == 0 && y < 9) {
+      y++;
+    } else if (s == 1 && y > 0) {
+      y--;
+    }
+  }
+
+  // Delay sebelum animasi keluar (reverse)
+  if (y == 9 && s == 0 && tHold == 0) {
+    tHold = millis();
+  }
+  if (tHold > 0 && (millis() - tHold > 4000)) {
+    s = 1;     // mulai keluar
+    tHold = 0; // reset timer
+  }
+
+  // Setelah animasi selesai
+  if (y == 0 && s == 1) {
+    s = 0;
+    pairIdx++;
+        if (pairIdx > 3) { // Jika sudah sampai Isya, kembali ke animasi utama
+          pairIdx = 0;
+          run = false;
+          s1 = 1; // trigger keluar vertikal
+        }
+    /*list = (list + 1) % 8;
+    if (list == 0) {
+      run = false;
+      s1 = 1; // trigger keluar vertikal
+    }*/
+  }
+
+// Tampilkan jam digital
+  fType(3);
+  Disp.drawChar(0, drawY, '0' + now.Hour() / 10);
+  Disp.drawChar(7, drawY, '0' + now.Hour() % 10);
+
+  Disp.drawChar(18, drawY, '0' + now.Minute() / 10);
+  Disp.drawChar(25, drawY, '0' + now.Minute() % 10);
+
+  fType(1);
+  dwCtr(0,drawY,TGLMASEHI());
+
+  // Baris 1: Jadwal Pertama (misal: Imsak)
+  char buf1[30];
+  snprintf(buf1, sizeof(buf1), "%s %02d:%02d %s %02d:%02d", 
+           jadwal[idx1], (uint8_t)time1, (uint8_t)((time1 - (uint8_t)time1) * 60),jadwal[idx2], (uint8_t)time2, (uint8_t)((time2 - (uint8_t)time2) * 60));
+  
+  fType(1); 
+  dwCtr(20,18 - y, buf1); // Tampilkan di baris atas7711
+
+
+//  fType(1);
+//  dwCtr(26, y - 9, jadwal[list]);
+//  dwCtr(28, 18 - y, buf);
+  DoSwap = true;
+  
+  if (y1 == 0 && s1 == 1) {
+    s1 = 0;
+    //show = ANIM_CLOCK; // Atau state awal kamu
+  }
+  
+}
+
+// Helper untuk ambil nilai float JWS berdasarkan index
+float getJWSValue(uint8_t index) {
+  switch (index) {
+    case 0: return JWS.floatImsak;
+    case 1: return JWS.floatSubuh;
+    case 2: return JWS.floatTerbit;
+    case 3: return JWS.floatDhuha;
+    case 4: return JWS.floatDzuhur;
+    case 5: return JWS.floatAshar;
+    case 6: return JWS.floatMaghrib;
+    case 7: return JWS.floatIsya;
+    default: return 0;
+  }
+}
+//=======================
 
 void runn(const char* msg, uint8_t speed, uint8_t fontt)
 {

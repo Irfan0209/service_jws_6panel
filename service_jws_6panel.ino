@@ -414,8 +414,8 @@ void loop()
     break;
   };*/
   
-  animasi2();
-  
+  //animasi2();
+  drawJadwalSholat();
 
     buzzerWarning(stateBuzzWar);
     yield();
