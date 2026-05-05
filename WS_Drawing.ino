@@ -198,8 +198,7 @@ void updateAnimUpDown(const char* msg) {
 
 
 //==================== animasi jam dan running text =================//
-
-void jamCenter(){
+void Center(int8_t y){
   if(adzan) return;
 
   RtcDateTime now = Rtc.GetDateTime();
@@ -208,21 +207,109 @@ void jamCenter(){
   Disp.drawLine(31,0,31,16,0);
   
   if(now.Second() % 2 ){
-      Disp.drawCircle(15,4,1,1);
-      Disp.drawCircle(15,11,1,1);
+      Disp.drawCircle(15,y + 4,1,1);
+      Disp.drawCircle(15,y + 11,1,1);
     }else{
-      Disp.drawCircle(15,4,1,0);
-      Disp.drawCircle(15,11,1,0);
+      Disp.drawCircle(15,y + 4,1,0);
+      Disp.drawCircle(15,y + 11,1,0);
     }
 
   fType(3);
   
-  Disp.drawChar(0, 0, '0' + now.Hour() / 10);
-  Disp.drawChar(7, 0, '0' + now.Hour() % 10); 
+  Disp.drawChar(0, y, '0' + now.Hour() / 10);
+  Disp.drawChar(7, y, '0' + now.Hour() % 10); 
   
-  Disp.drawChar(18, 0, '0' + now.Minute() / 10);
-  Disp.drawChar(25, 0, '0' + now.Minute() % 10);
+  Disp.drawChar(18, y, '0' + now.Minute() / 10);
+  Disp.drawChar(25, y, '0' + now.Minute() % 10);
   //DoSwap = true;
+}
+
+void jamCenter() {
+  if (adzan) return;
+  
+  logo1(165);
+  logo2(0);
+  
+  char jam[10];
+  static byte y;
+  static bool s; // 0=in, 1=out
+  static uint32_t lsRn;
+  //static uint8_t lastSec; // Simpan detik terakhir
+  uint32_t Tmr = millis();
+
+  // 1. Ambil waktu hanya jika diperlukan (misal: saat detik berubah atau animasi jalan)
+  RtcDateTime now = Rtc.GetDateTime();
+  
+  // 2. Cache kalkulasi posisi Y
+  int8_t drawY = 17 - y;
+
+  if ((Tmr - lsRn) > 75) {
+    if (s == 0 && y < 17) { lsRn = Tmr; y++; }
+    else if (s == 1 && y > 0) { lsRn = Tmr; y--; }
+  }
+
+  fType(5);
+
+  // 3. Optimasi Gambar: Gunakan variabel lokal untuk digit agar tidak hitung berulang
+  uint8_t h = now.Hour();
+  uint8_t m = now.Minute();
+  //uint8_t d = now.Second();
+  bool blink = now.Second() % 2;
+  
+  blink?snprintf(jam,sizeof(jam),"%02d:%02d",h,m) : snprintf(jam,sizeof(jam),"%02d %02d",h,m);
+  
+  dwCtr(0,drawY,jam);
+  
+  // 4. Logika Transisi
+  if ((Tmr - lsRn) > 5000 && y == 17) { s = 1; }
+  
+  if (y == 0 && s == 1) {
+    Disp.clear();
+    // Gunakan F() macro sudah benar untuk hemat RAM
+    Serial.printf_P(PSTR("TIME:%d,%d,%d,%d\n"), h, m, now.Second(), now.DayOfWeek());
+    s = 0;
+    show = ANIM_DATE;
+  }
+  
+  DoSwap = true;
+}
+
+void animasi2(){
+   static uint16_t   x; 
+    static uint16_t fullScroll = 0;
+    if(adzan) return;
+    if (reset_x !=0) { x=0; reset_x = 0; fullScroll = 0;}      
+
+    uint32_t          Tmr = millis();
+    static uint32_t lss=0;
+    RtcDateTime now = Rtc.GetDateTime();
+    
+    fType(1);
+    uint16_t w = Disp.textWidth(showTanggal());
+//    if (w == 0) {
+//       nextShowState();
+//       return;
+//    }
+    fullScroll = w + DWidth;
+      
+    if((Tmr-lss)> 45)
+      { lss=Tmr;
+        if (x < fullScroll) {++x;}
+        else {
+          
+          x = 0; 
+          fullScroll = 0;
+          return;}
+     Disp.drawText(DWidth - x, 9, showTanggal()); //runing teks diatas
+        //fType(1);
+        if (x<=6)                     { Center(x-6); fType(1); dwCtr(0, x-6, TGLMASEHI());}
+        else if (x>=(fullScroll-6))   { Center((fullScroll-x)-6); fType(1); dwCtr(0, (fullScroll-x)-6, TGLMASEHI());}
+        else                          { Center(0); fType(1); dwCtr(0,0,TGLMASEHI());}//posisi jamnya yang bawah
+        //fType(1);  //Marquee    jam yang tampil di bawah
+        
+      
+        DoSwap = true;
+      }
 }
 
 void runn(const char* msg, uint8_t speed, uint8_t fontt)
@@ -289,6 +376,26 @@ void nextShowState()
     case ANIM_TEXT5:   show = ANIM_COUNTER; break;
     case ANIM_COUNTER:   show = ANIM_BIGFONT; line = ANIM_ZONK; reset_x = 1; break;
   }
+}
+
+void logo1 (uint8_t x){
+  if (adzan) return;
+  static const uint8_t logo1[] PROGMEM = {
+    16,16,
+  0x00, 0x00, 0x0c, 0xc0, 0x0d, 0xc0, 0x19, 0xc1, 0x00, 0x03, 0x04, 0x0b, 0x4c, 0xdb, 0x9c, 0xdb, 0xbc, 0xdb, 0xfc, 0xdb, 0x6c, 0xdb, 0x0c, 0xdb, 0x0c, 0xdb, 0x0f, 0xfb, 0x07, 0x32, 0x00, 0x00
+
+    //0x06, 0x60, 0x06, 0xe3, 0x0c, 0xe3, 0x00, 0x01, 0x02, 0x05, 0x06, 0x6d, 0x4e, 0x6d, 0x5e, 0x6d, 0x7e, 0x6d, 0x36, 0x6d, 0x06, 0x6d, 0x06, 0x6d, 0x06, 0x6d, 0x07, 0xfd, 0x03, 0x98, 0x00, 0x00
+  };
+  Disp.drawBitmap(x,0,logo1);
+}
+
+void logo2 (uint8_t x){
+  if (adzan) return;
+  static const uint8_t logo2[] PROGMEM = {
+    16,16,
+    0x00, 0x00, 0x13, 0x00, 0x1b, 0x00, 0x18, 0x38, 0x08, 0x2c, 0x0c, 0x78, 0x0d, 0xf0, 0x07, 0x00, 0x07, 0xff, 0x0c, 0x7c, 0x1d, 0xe0, 0x77, 0x80, 0xe3, 0x80, 0x83, 0x80, 0x01, 0x80, 0x00, 0x00
+};
+  Disp.drawBitmap(x,0,logo2);
 }
 
 /*======================= animasi memasuki waktu sholat ====================================*/

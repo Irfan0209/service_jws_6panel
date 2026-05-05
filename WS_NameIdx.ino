@@ -3,8 +3,8 @@
 char * TGLMASEHI()
   {
     RtcDateTime now = Rtc.GetDateTime();
-    static char  out[12];
-    snprintf(out,sizeof(out),"%02d-%02d-%04d",now.Day(),now.Month(),now.Year());
+    static char  out[20];
+    snprintf(out,sizeof(out),"%s,%02d %02d %04d",Hari[now.DayOfWeek()],now.Day(),now.Month(),now.Year());
     return out;     
   }
 
