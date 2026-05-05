@@ -3,7 +3,7 @@
 char * const pasar[]  = {"WAGE", "KLIWON", "LEGI", "PAHING", "PON"}; 
 char * const Hari[]  = {"MINGGU","SENIN","SELASA","RABU","KAMIS","JUM'AT","SABTU"};
 //const char * const bulanMasehi[] PROGMEM = {"JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" };
-char* jadwal[] = {"IMSAK","SUBUH", "TERBIT","DHUHA", "DZUHUR", "ASHAR", "MAGRIB", "ISYA'"};
+char* jadwal[] = {"IMSAK","SUBUH", "TERBIT","DHUHA", "DZUHUR", "ASHAR", "MAGHRIB", "ISYA'"};
 char* jadwalAzzan[] = {"SUBUH","DZUHUR", "ASHAR", "MAGRIB", "ISYA'"};
 char * namaBulanHijriah[] = {
     "MUHARRAM", "SHAFAR", "RABIUL AWAL",
@@ -86,7 +86,7 @@ void updateAnimSholat() {
         else {
           shAnim.sNum++;
           if (shAnim.sNum >= SHOLAT_COUNT) {
-            line = ANIM_MASEHI;
+            //line = ANIM_MASEHI;
             Serial.println("TIME:" + String(noww.Hour()) + "," + String(noww.Minute()) + "," + String(noww.Second()) + "," + String(noww.DayOfWeek()));
             shAnim.sNum=0;
             return;
@@ -181,9 +181,9 @@ void updateAnimUpDown(const char* msg) {
         msAnim.timer = now;
         if (msAnim.x > 0) msAnim.x--;
         else {
-          if(line == ANIM_MASEHI){ line = ANIM_DAY_NASIONAL; }
-          else if(line == ANIM_DAY_NASIONAL){ line = ANIM_DAY_PASARAN; }
-          else if(line == ANIM_DAY_PASARAN){ line = ANIM_SHOLAT; }
+//          if(line == ANIM_MASEHI){ line = ANIM_DAY_NASIONAL; }
+//          else if(line == ANIM_DAY_NASIONAL){ line = ANIM_DAY_PASARAN; }
+//          else if(line == ANIM_DAY_PASARAN){ line = ANIM_SHOLAT; }
           msAnim.phase = PHASE_IN;
           return;
         }
@@ -256,10 +256,14 @@ void jamCenter() {
   //uint8_t d = now.Second();
   bool blink = now.Second() % 2;
   
-  blink?snprintf(jam,sizeof(jam),"%02d:%02d",h,m) : snprintf(jam,sizeof(jam),"%02d %02d",h,m);
-  
+  snprintf(jam,sizeof(jam),"%02d %02d",h,m);
+
   dwCtr(0,drawY,jam);
   
+  Disp.drawCircle(95,drawY + 4,1,blink);
+  Disp.drawCircle(95,drawY+ 11,1,blink);
+      
+
   // 4. Logika Transisi
   if ((Tmr - lsRn) > 5000 && y == 17) { s = 1; }
   
@@ -296,15 +300,19 @@ void animasi2(){
       { lss=Tmr;
         if (x < fullScroll) {++x;}
         else {
-          
+          show = ANIM_SHOLAT;
           x = 0; 
           fullScroll = 0;
           return;}
      Disp.drawText(DWidth - x, 9, showTanggal()); //runing teks diatas
         //fType(1);
-        if (x<=6)                     { Center(x-6); fType(1); dwCtr(0, x-6, TGLMASEHI());}
-        else if (x>=(fullScroll-6))   { Center((fullScroll-x)-6); fType(1); dwCtr(0, (fullScroll-x)-6, TGLMASEHI());}
-        else                          { Center(0); fType(1); dwCtr(0,0,TGLMASEHI());}//posisi jamnya yang bawah
+        if (x<=6)                     { fType(1); dwCtr(32, x-6, TGLMASEHI());}
+        else if (x>=(fullScroll-6))   { fType(1); dwCtr(32, (fullScroll-x)-6, TGLMASEHI());}
+        else                          { fType(1); dwCtr(32,0,TGLMASEHI());}//posisi jamnya yang bawah
+
+        if (x<=16)                    { Center(x-16); }
+        else if (x>=(fullScroll-16))   { Center((fullScroll-x)-16); }
+        else                          { Center(0); }//posisi jamnya yang bawah
         //fType(1);  //Marquee    jam yang tampil di bawah
         
       
@@ -313,7 +321,41 @@ void animasi2(){
 }
 
 void animasi3(){
-  
+  static uint16_t   x; 
+    static uint16_t fullScroll = 0;
+    if(adzan) return;
+    if (reset_x !=0) { x=0; reset_x = 0; fullScroll = 0;}      
+
+    uint32_t          Tmr = millis();
+    static uint32_t lss=0;
+    RtcDateTime now = Rtc.GetDateTime();
+    
+    fType(1);
+    uint16_t w = Disp.textWidth(config.name);
+
+    fullScroll = w + DWidth;
+      
+    if((Tmr-lss)> 45)
+      { lss=Tmr;
+        if (x < fullScroll) {++x;}
+        else {
+          show = ANIM_CLOCK;
+          x = 0; 
+          fullScroll = 0;
+          return;}
+         Disp.drawText(DWidth - x, 0, config.name); //runing teks diatas
+        
+        if (x<=6)                     {fType(1); dwCtr(32, 16-x, TGLMASEHI());}
+        else if (x>=(fullScroll-6))   {fType(1); dwCtr(32, 16-(fullScroll-x), TGLMASEHI());}
+        else                          {fType(1); dwCtr(32,9,TGLMASEHI());}//posisi jamnya yang bawah
+
+        if (x<=16)                     {Center(16-x); }
+        else if (x>=(fullScroll-16))   {Center(16-(fullScroll-x));}
+        else                           { Center(0); }//posisi jamnya yang bawah
+      
+      
+        DoSwap = true;
+      }
 }
 //=======================
 void drawJadwalSholat() {
@@ -405,25 +447,21 @@ void drawJadwalSholat() {
   Disp.drawChar(25, drawY, '0' + now.Minute() % 10);
 
   fType(1);
-  dwCtr(0,drawY,TGLMASEHI());
+  dwCtr(32,drawY,TGLMASEHI());
 
   // Baris 1: Jadwal Pertama (misal: Imsak)
   char buf1[30];
-  snprintf(buf1, sizeof(buf1), "%s %02d:%02d %s %02d:%02d", 
+  snprintf(buf1, sizeof(buf1), "%s %02d:%02d  %s %02d:%02d", 
            jadwal[idx1], (uint8_t)time1, (uint8_t)((time1 - (uint8_t)time1) * 60),jadwal[idx2], (uint8_t)time2, (uint8_t)((time2 - (uint8_t)time2) * 60));
   
   fType(1); 
-  dwCtr(20,18 - y, buf1); // Tampilkan di baris atas7711
+  dwCtr(32,18 - y, buf1); // Tampilkan di baris atas7711
 
-
-//  fType(1);
-//  dwCtr(26, y - 9, jadwal[list]);
-//  dwCtr(28, 18 - y, buf);
   DoSwap = true;
   
   if (y1 == 0 && s1 == 1) {
     s1 = 0;
-    //show = ANIM_CLOCK; // Atau state awal kamu
+    show = ANIM_NAME; // Atau state awal kamu
   }
   
 }
@@ -499,14 +537,14 @@ void nextShowState()
 { 
   
   switch(show){
-    case ANIM_BIGFONT: show = ANIM_DATE;  line = ANIM_SHOLAT; break;
+   // case ANIM_BIGFONT: show = ANIM_DATE;  //line = ANIM_SHOLAT; break;
     case ANIM_DATE:    show = ANIM_TEXT1; break;
     case ANIM_TEXT1:   show = ANIM_TEXT2; break;
     case ANIM_TEXT2:   show = ANIM_TEXT3; break;
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
     case ANIM_TEXT5:   show = ANIM_COUNTER; break;
-    case ANIM_COUNTER:   show = ANIM_BIGFONT; line = ANIM_ZONK; reset_x = 1; break;
+   // case ANIM_COUNTER:   show = ANIM_BIGFONT; line = ANIM_ZONK; reset_x = 1; break;
   }
 }
 
@@ -640,7 +678,7 @@ void blinkBlock()
         sholatNow = -1;
         adzan = false;
         ct = 0;
-        show = ANIM_BIGFONT;
+        //show = ANIM_BIGFONT;
     }
 }
 //===================================== end =================================//

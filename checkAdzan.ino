@@ -62,7 +62,7 @@ void check() {
           adzan = 1;
           reset_x = 1;
           show = ANIM_ADZAN;
-          line = ANIM_ZONK;
+          //line = ANIM_ZONK;
           adzanFlag[counter] = true;
           
         }

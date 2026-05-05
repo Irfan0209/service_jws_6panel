@@ -114,7 +114,8 @@ bool       panelState = false; // false = OFF, true = ON
 
 enum Show{
  // ANIM_ZONK,
-  ANIM_BIGFONT,
+  ANIM_CLOCK,
+  ANIM_SHOLAT,
   ANIM_TEXT1,
   ANIM_TEXT2,
   ANIM_TEXT3,
@@ -127,16 +128,16 @@ enum Show{
   ANIM_BLINK,
   ANIM_COUNTER
 };
-Show show = ANIM_BIGFONT;
+Show show = ANIM_CLOCK;
 
-enum Line{
-  ANIM_ZONK,
-  ANIM_SHOLAT,
-  ANIM_MASEHI,
-  ANIM_DAY_NASIONAL,
-  ANIM_DAY_PASARAN
-};
-Line line = ANIM_ZONK;
+//enum Line{
+//  ANIM_ZONK,
+//  ANIM_SHOLAT,
+//  ANIM_MASEHI,
+//  ANIM_DAY_NASIONAL,
+//  ANIM_DAY_PASARAN
+//};
+//Line line = ANIM_ZONK;
 
 #define EEPROM_SIZE       2000
 
@@ -340,24 +341,24 @@ void loop()
   islam();
   Disp.clear();
   
-  /*switch(show){
-    case ANIM_BIGFONT : 
-       runn(config.name,config.speedName,5);
+  switch(show){
+    case ANIM_CLOCK : 
+       jamCenter();
     break;
 
     case ANIM_DATE :
-     runn(showTanggal(),config.speedDate,1);
+        animasi2();
+    break;
+
+    case ANIM_SHOLAT :
+        drawJadwalSholat();
     break;
 
     case ANIM_NAME :
-    runn(config.name,config.speedName,1);
+        animasi3();
     break;
-
-    case ANIM_TEXT1 :
-    runn(config.text1,config.speedText1,1);
-    break;
-
-    case ANIM_TEXT2 :
+  };
+    /*case ANIM_TEXT2 :
     runn(config.text2,config.speedText2,1);
     break;
 
@@ -415,8 +416,8 @@ void loop()
   };*/
   
   //animasi2();
-  drawJadwalSholat();
-
+  //drawJadwalSholat();
+  //animasi3();
     buzzerWarning(stateBuzzWar);
     yield();
     if(DoSwap){Disp.swapBuffers();} // Swap Buffer if Change
