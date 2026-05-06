@@ -113,7 +113,6 @@ bool       panelState = false; // false = OFF, true = ON
 /*============== end ================*/
 
 enum Show{
- // ANIM_ZONK,
   ANIM_CLOCK,
   ANIM_SHOLAT,
   ANIM_TEXT1,
@@ -354,24 +353,28 @@ void loop()
         drawJadwalSholat();
     break;
 
-    case ANIM_NAME :
-        animasi3();
+    case ANIM_TEXT1 :
+        dwMrq(config.text1,config.speedText1,1,1);
     break;
-  };
-    /*case ANIM_TEXT2 :
-    runn(config.text2,config.speedText2,1);
+
+    case ANIM_TEXT2 :
+        dwMrq(config.text2,config.speedText2,1,1);
     break;
 
     case ANIM_TEXT3 :
-    runn(config.text3,config.speedText3,1);
+        dwMrq(config.text3,config.speedText3,1,1);
     break;
 
     case ANIM_TEXT4 :
-    runn(config.text4,config.speedText4,1);
+        dwMrq(config.text4,config.speedText4,1,1);
     break;
 
     case ANIM_TEXT5 :
-    runn(config.text5,config.speedText5,1);
+        dwMrq(config.text5,config.speedText5,1,1);
+    break;
+
+    case ANIM_NAME :
+        dwMrq(config.name,config.speedName,3,5);
     break;
 
     case ANIM_ADZAN :
@@ -385,39 +388,8 @@ void loop()
     case ANIM_BLINK :
       blinkBlock();
     break;
-
-    case ANIM_COUNTER :
-     updateNowTime();
-     updateSholatNow();
-     runn(tampilSelisih(),50,1);
-    break;
   };
 
-  switch(line){
-    case ANIM_ZONK :
-
-    break;
-    
-    case ANIM_SHOLAT :
-      updateAnimSholat();
-    break;
-
-    case ANIM_MASEHI :
-      updateAnimUpDown(TGLMASEHI());
-    break;
-
-    case ANIM_DAY_NASIONAL :
-      updateAnimUpDown(NASIONAL());
-    break;
-
-    case ANIM_DAY_PASARAN :
-      updateAnimUpDown(PASARAN());
-    break;
-  };*/
-  
-  //animasi2();
-  //drawJadwalSholat();
-  //animasi3();
     buzzerWarning(stateBuzzWar);
     yield();
     if(DoSwap){Disp.swapBuffers();} // Swap Buffer if Change
