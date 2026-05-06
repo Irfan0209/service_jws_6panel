@@ -183,7 +183,7 @@ void jamCenter() {
   icon2(5, y - 17);
   
   // 4. Logika Transisi (Tahan 5 detik sebelum keluar)
-  if ((Tmr - lsRn) > 5000 && y == 17) { s = 1; }
+  if ((Tmr - lsRn) > 8000 && y == 17) { s = 1; }
   
   if (y == 0 && s == 1) {
     Disp.clear();

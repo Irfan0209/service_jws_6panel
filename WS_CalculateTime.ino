@@ -13,7 +13,9 @@ void islam() {
     stateBuzzWar = 1;
   }
 
-  if (now.Minute() == 0 && now.Second() == 0){
+   static int8_t lastDayCalc = -1;
+  if (now.Minute() == 0 && now.Second() == 0 && now.Hour() != lastDayCalc){
+    lastDayCalc = now.Hour();
     butuhHitungJadwal = true; 
   }
 
