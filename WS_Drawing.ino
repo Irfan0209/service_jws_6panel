@@ -132,9 +132,6 @@ void Center(int8_t x,int8_t y){
 void jamCenter() {
   if (adzan) return;
   
-  iconAllah(165);
-  logo2(0);
-  
   char jam[10];
   static byte y;
   static bool s; // 0=in, 1=out
@@ -161,9 +158,9 @@ void jamCenter() {
   
   bool blink = now.Second() % 2;
   
-//  snprintf(jam,sizeof(jam),"%02d %02d",h,m);
-//
-//  dwCtr(0,drawY,jam);
+  icon1(165, y - 17);
+  icon2(5, y - 17);
+  
   Disp.drawChar(75, drawY, '0' + h / 10);
   Disp.drawChar(84, drawY, '0' + h % 10); 
   
@@ -182,7 +179,7 @@ void jamCenter() {
     // Gunakan F() macro sudah benar untuk hemat RAM
     Serial.printf_P(PSTR("TIME:%d,%d,%d,%d\n"), h, m, now.Second(), now.DayOfWeek());
     s = 0;
-    show = ANIM_CLOCK;//ANIM_DATE;
+    show = ANIM_DATE;
   }
   
   DoSwap = true;
@@ -432,62 +429,92 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
   DoSwap = true;
 }
 
-void logo1 (uint8_t x){
-  if (adzan) return;
-  static const uint8_t logo1[] PROGMEM = {
-    16,16,
-  0x00, 0x00, 0x0c, 0xc0, 0x0d, 0xc0, 0x19, 0xc1, 0x00, 0x03, 0x04, 0x0b, 0x4c, 0xdb, 0x9c, 0xdb, 0xbc, 0xdb, 0xfc, 0xdb, 0x6c, 0xdb, 0x0c, 0xdb, 0x0c, 0xdb, 0x0f, 0xfb, 0x07, 0x32, 0x00, 0x00
+void drawTestPanel() {
+    static uint32_t lastTestUpdate = 0;
+    static uint8_t testStep = 0;
+    uint32_t currentMillis = millis();
 
-    //0x06, 0x60, 0x06, 0xe3, 0x0c, 0xe3, 0x00, 0x01, 0x02, 0x05, 0x06, 0x6d, 0x4e, 0x6d, 0x5e, 0x6d, 0x7e, 0x6d, 0x36, 0x6d, 0x06, 0x6d, 0x06, 0x6d, 0x06, 0x6d, 0x07, 0xfd, 0x03, 0x98, 0x00, 0x00
+    // Ganti pola test setiap 2000 ms (2 detik)
+    if (currentMillis - lastTestUpdate > 2000) { 
+        lastTestUpdate = currentMillis;
+        
+        //Disp.clear(); // Selalu bersihkan layar sebelum ganti pola
+        
+        if (testStep == 0) {
+            // STEP 1: Nyalakan SEMUA LED (Untuk cek dead pixel)
+            // Sesuaikan dimensi (192, 16) dengan konfigurasi susunan 6 panelmu
+            Disp.drawFilledRect(0, 0, DWidth, DHeight); 
+            testStep = 1;
+        } 
+        else if (testStep == 1) {
+            // STEP 2: Matikan SEMUA LED (Untuk cek LED yang stuck/nyala terus)
+            // Layar dibiarkan kosong karena sudah di-clear di atas
+            testStep = 2;
+        }
+//        else if (testStep == 2) {
+//            // STEP 3: Pola Garis Horizontal (Untuk cek kestabilan jalur data IC)
+//            for (int y = 0; y < DHeight; y += 2) {
+//                Disp.drawLine(0, y, DWidth, y);
+//            }
+//            testStep = 3;
+//        }
+//        else if (testStep == 3) {
+//            // STEP 4: Pola Garis Vertikal
+//            for (uint8_t x = 0; x < DWidth; x += 4) {
+//                Disp.drawLine(x, 0, x, DHeight);
+//            }
+//            testStep = 0;
+//        }
+        else if (testStep == 2) {
+            // STEP 5: Pola Blok IC Shift Register 74HC595 (Sumbu X)
+            for (int x = 0; x < DWidth; x += 8) {
+                if ((x / 8) % 2 == 0) {
+                    // Parameter dirubah menjadi (x1, y1, x2, y2)
+                    // x2 diisi dengan (x + 7) agar lebarnya selalu 8 piksel
+                    // y2 diisi dengan (DHeight - 1) agar tidak melebihi batas bawah panel
+                    Disp.drawFilledRect(x, 0, x + 7, DHeight - 1);
+                }
+            }
+            testStep = 3; // Lanjut ke step 6
+        }
+        else if (testStep == 3) {
+            // STEP 6: Pola Cek IC Decoder 74HC138 (Sumbu Y - 1/4 Scan)
+            // Menggambar garis horizontal setiap kelipatan 4 baris
+            // (Mewakili baris ke 0, 4, 8, dan 12)
+            for (int y = 0; y < DHeight; y += 4) {
+                // Ubah DWidth menjadi (DWidth - 1) agar garis mentok di piksel terakhir
+                Disp.drawLine(0, y, DWidth - 1, y);
+            }
+            testStep = 0; // Sequence selesai, ulangi dari awal
+        }
+        
+        
+        DoSwap = true; // Eksekusi gambar ke buffer layar
+    }
+}
+
+void icon1 (uint8_t x, uint8_t y){
+  if (adzan) return;
+  static const uint8_t icon1[] PROGMEM = {
+  21,16,
+  0x11, 0x50, 0x00, 0x21, 0xf0, 0x20, 0x40, 0x02, 0x30, 0xa0, 0x23, 0x38, 0x40, 0x33, 0xb0, 0x00, 
+  0x33, 0x30, 0x06, 0x33, 0x30, 0x0f, 0x33, 0x30, 0x0b, 0x33, 0x30, 0x8b, 0x33, 0x30, 0x9b, 0x33, 
+  0x30, 0xf3, 0x33, 0x30, 0x63, 0x73, 0x30, 0x03, 0xf3, 0x30, 0x01, 0xbe, 0x20, 0x00, 0x1c, 0x20
   };
-  Disp.drawBitmap(x,0,logo1);
+  Disp.drawBitmap(x,y,icon1);
 }
 
-void logo2 (uint8_t x){
+void icon2 (uint8_t x, uint8_t y){
   if (adzan) return;
-  static const uint8_t logo2[] PROGMEM = {
-    16,16,
-    0x00, 0x00, 0x13, 0x00, 0x1b, 0x00, 0x18, 0x38, 0x08, 0x2c, 0x0c, 0x78, 0x0d, 0xf0, 0x07, 0x00, 0x07, 0xff, 0x0c, 0x7c, 0x1d, 0xe0, 0x77, 0x80, 0xe3, 0x80, 0x83, 0x80, 0x01, 0x80, 0x00, 0x00
-};
-  Disp.drawBitmap(x,0,logo2);
-}
-
-void iconAllah(uint8_t x) {
-  if (adzan) return;
-
-  static const uint8_t bitmap_Allah_P10_32x16[] PROGMEM = {
-    32, 16, // HEADER: Lebar 32 pixel, Tinggi 16 pixel
-
-    // DATA PIXEL KALIGRAFI
-    // Baris 0-3 
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x18, 0x18, 0x00,
-    0x01, 0x3E, 0x3E, 0x80,
-    0x03, 0x3E, 0x3E, 0xC0,
-
-    // Baris 4-7 
-    0x03, 0x3F, 0x3F, 0xC0,
-    0x07, 0x7F, 0x7F, 0xE0,
-    0x0F, 0xFF, 0xFF, 0xF0,
-    0x0F, 0xFD, 0xFD, 0xF0,
-
-    // Baris 8-11 
-    0x1F, 0xF9, 0xF9, 0xF8,
-    0x1F, 0xF1, 0xF1, 0xF8,
-    0x1F, 0xE1, 0xE1, 0xF8,
-    0x1F, 0xF3, 0xF3, 0xF8,
-
-    // Baris 12-15 
-    0x0F, 0xFF, 0xFF, 0xF0,
-    0x07, 0xFE, 0xFE, 0xE0,
-    0x03, 0xFC, 0xFC, 0xC0,
-    0x00, 0x00, 0x00, 0x00
+  static const uint8_t icon2[] PROGMEM = {
+  22,16,
+  0x00, 0x54, 0x00, 0x70, 0x7c, 0x38, 0x50, 0x00, 0x7c, 0x30, 0x00, 0x4c, 0x02, 0x00, 0x4c, 0x06, 
+  0x00, 0x78, 0x07, 0x00, 0xe0, 0x03, 0x07, 0x80, 0x01, 0x9f, 0xc0, 0x01, 0x80, 0xf0, 0x41, 0x80, 
+  0x18, 0x41, 0x81, 0xfc, 0x43, 0xe7, 0x8c, 0x7e, 0x76, 0x00, 0x3c, 0x1f, 0xc0, 0x00, 0x0f, 0xc0 
   };
-
-  Disp.drawBitmap(x, 0, bitmap_Allah_P10_32x16); 
-  
-  DoSwap = true;
+  Disp.drawBitmap(x,y,icon2);
 }
+
 /*======================= animasi memasuki waktu sholat ====================================*/
 void drawAzzan()
 {

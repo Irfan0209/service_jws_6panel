@@ -68,6 +68,7 @@ struct Config {
   bool       stateBuzzerClock;
   bool       stateBuzzer;
   bool       stateAlarm ;
+  bool       testPanel;
   uint8_t    jamOn ;
   uint8_t    jamOff ;
   uint8_t    menitOn ;
@@ -125,7 +126,7 @@ enum Show{
   ANIM_ADZAN,
   ANIM_IQOMAH,
   ANIM_BLINK,
-  ANIM_COUNTER
+  ANIM_TEST
 };
 Show show = ANIM_CLOCK;
 
@@ -190,6 +191,8 @@ Show show = ANIM_CLOCK;
 #define ADDR_MENITOFF     1571   // 1
 
 #define ADDR_STATEALARM   1572   // 1
+
+//#define ADDR_TESTPANEL    1573   // 1
 
 // Menggunakan const char* (Array of Character) menggantikan objek String
 void saveStringToEEPROM(int startAddr, const char* data, int maxLength) {
@@ -377,6 +380,10 @@ void loop()
         dwMrq(config.name,config.speedName,3,5);
     break;
 
+    case ANIM_TEST :
+        drawTestPanel();
+    break;
+
     case ANIM_ADZAN :
       dwMrq(AZZAN(),15,3,5);
       drawAzzan();
@@ -562,6 +569,15 @@ void getData(const char* data) {
       config.stateBuzzerClock = atoi(ptr);
       EEPROM.write(ADDR_BUZZER_CLOCK, config.stateBuzzerClock);
     } 
+
+    else if (key_len == 4 && strncmp(data, "test", 4) == 0) {
+      config.testPanel = atoi(ptr); // Misal: kirim "test=1" untuk mulai, "test=0" untuk stop
+      if (config.testPanel == 1) {
+        show = ANIM_TEST; // Asumsi kamu menggunakan state machine seperti ANIM_CLOCK
+      } else {
+        show = ANIM_CLOCK; // Kembali ke tampilan jam
+      }
+    }
     
     else if (key_len == 5 && strncmp(data, "alarm", 5) == 0) {
       config.stateAlarm = atoi(ptr);
