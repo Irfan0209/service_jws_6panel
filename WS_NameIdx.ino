@@ -1,4 +1,10 @@
-
+char * AZZAN()
+  {
+    static char  out[35];
+    const char *sholat = jadwalAzzan[sholatNow];
+    snprintf(out,sizeof(out),"%s %s","MEMASUKI WAKTU SHOLAT",sholat);
+    return out;     
+  }
 
 char * TGLMASEHI()
   {

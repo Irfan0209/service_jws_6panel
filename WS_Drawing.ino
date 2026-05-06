@@ -4,7 +4,7 @@ char * const pasar[]  = {"WAGE", "KLIWON", "LEGI", "PAHING", "PON"};
 char * const Hari[]  = {"MINGGU","SENIN","SELASA","RABU","KAMIS","JUM'AT","SABTU"};
 //const char * const bulanMasehi[] PROGMEM = {"JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" };
 char* jadwal[] = {"IMSAK","SUBUH", "TERBIT","DHUHA", "DZUHUR", "ASHAR", "MAGHRIB", "ISYA'"};
-char* jadwalAzzan[] = {"SUBUH","DZUHUR", "ASHAR", "MAGRIB", "ISYA'"};
+char* jadwalAzzan[] = {"SUBUH","DZUHUR", "ASHAR", "MAGHRIB", "ISYA'"};
 char * namaBulanHijriah[] = {
     "MUHARRAM", "SHAFAR", "RABIUL AWAL",
     "RABIUL AKHIR", "JUMADIL AWAL", 
@@ -28,7 +28,7 @@ void dwMrq(const char* msg, uint8_t Speed, uint8_t dDT,uint8_t fontt) //running 
   { 
     static uint16_t   x; 
     static uint16_t fullScroll = 0;
-    if(adzan) return;
+    //if(adzan) return;
     if (reset_x !=0) { x=0; reset_x = 0; fullScroll = 0;}      
 
     uint32_t          Tmr = millis();
@@ -499,8 +499,8 @@ void drawAzzan()
         if (!(ct & 1))  // Lebih cepat dibandingkan ct % 2 == 0
         {
           fType(1);
-          dwCtr(0, 0, "ADZAN");
-          dwCtr(0, 8, sholat);
+//          dwCtr(0, 0, "ADZAN");
+//          dwCtr(0, 8, sholat);
           Buzzer(1);
            
         }
@@ -525,19 +525,18 @@ void drawIqomah()  // Countdown Iqomah (9 menit)
     static uint32_t lsRn = 0;
     static uint16_t ct = 0;  // Mulai dari 0 untuk menghindari error
     static uint8_t mnt, scd;
-    char locBuff[10];  
+    char locBuff[25];  
     uint32_t now = millis();  // Simpan millis() di awal
     
     uint16_t cn_l = (iqomah[sholatNow] * 60);
     
     mnt = (cn_l - ct) / 60;
     scd = (cn_l - ct) % 60;
-    snprintf(locBuff,sizeof(locBuff), "-%02d:%02d", mnt, scd);
+    snprintf(locBuff,sizeof(locBuff), "%s -%02d:%02d","MENUJU IQOMAH:", mnt, scd);
 
    // if ((ct & 1) == 0) {  // Gunakan bitwise untuk optimasi modulo 2
     fType(1);
-    dwCtr(0, 0, "MENUJU IQOMAH:");
-    dwCtr(0, 8, locBuff);
+    dwCtr(0, 4, locBuff);
     DoSwap = true;
     
     if (now - lsRn > 1000) 
@@ -576,7 +575,7 @@ void blinkBlock()
     char timeBuff[9];
     snprintf(timeBuff,sizeof(timeBuff), "%02d:%02d:%02d", now.Hour(), now.Minute(), now.Second());
     
-    fType(0);
+    fType(1);
     dwCtr(60, 8, timeBuff);
     DoSwap = true;
      
