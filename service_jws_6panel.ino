@@ -87,8 +87,8 @@ uint8_t    DWidth        = Disp.width();
 uint8_t    DHeight       = Disp.height();
 
 // Variabel untuk waktu, tanggal, teks berjalan, tampilan ,dan kecerahan
-bool       adzan         = 1;
-int8_t     sholatNow     = 0;
+bool       adzan         = 0;
+int8_t     sholatNow     = -1;
 bool       reset_x       = 0; 
 
 /*======library tambahan=======*/
@@ -127,7 +127,7 @@ enum Show{
   ANIM_BLINK,
   ANIM_COUNTER
 };
-Show show = ANIM_ADZAN;
+Show show = ANIM_CLOCK;
 
 //enum Line{
 //  ANIM_ZONK,

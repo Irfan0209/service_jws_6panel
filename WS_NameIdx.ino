@@ -2,7 +2,7 @@ char * AZZAN()
   {
     static char  out[35];
     const char *sholat = jadwalAzzan[sholatNow];
-    snprintf(out,sizeof(out),"%s %s","MEMASUKI WAKTU SHOLAT",sholat);
+    snprintf(out,sizeof(out),"%s %s","memasuki waktu sholat",sholat);
     return out;     
   }
 
@@ -10,7 +10,7 @@ char * TGLMASEHI()
   {
     RtcDateTime now = Rtc.GetDateTime();
     static char  out[20];
-    snprintf(out,sizeof(out),"%s,%02d %02d %04d",Hari[now.DayOfWeek()],now.Day(),now.Month(),now.Year());
+    snprintf(out,sizeof(out),"%s,%02d %s %04d",Hari[now.DayOfWeek()],now.Day(),bulanMasehi[now.Month()],now.Year());
     return out;     
   }
 
@@ -36,10 +36,10 @@ char * showTanggal(){
     
   snprintf(
       buff_date,sizeof(buff_date),
-      "%s %s, %02d-%02d-%04d %02d %s %02dH",
+      "%s %s, %02d %s %04d %02d %s %02dH",
       Hari[now.DayOfWeek()],
       pasar[jumlahhari() % 5],
-      now.Day(), now.Month(), now.Year(),
+      now.Day(), bulanMasehi[now.Month()], now.Year(),
       Hijir.getHijriyahDate,
       namaBulanHijriah[Hijir.getHijriyahMonth - 1],
       Hijir.getHijriyahYear

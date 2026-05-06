@@ -2,7 +2,7 @@
 //=================== new variabel ========================//
 char * const pasar[]  = {"WAGE", "KLIWON", "LEGI", "PAHING", "PON"}; 
 char * const Hari[]  = {"MINGGU","SENIN","SELASA","RABU","KAMIS","JUM'AT","SABTU"};
-//const char * const bulanMasehi[] PROGMEM = {"JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" };
+char * const bulanMasehi[]  = {"JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" };
 char* jadwal[] = {"IMSAK","SUBUH", "TERBIT","DHUHA", "DZUHUR", "ASHAR", "MAGHRIB", "ISYA'"};
 char* jadwalAzzan[] = {"SUBUH","DZUHUR", "ASHAR", "MAGHRIB", "ISYA'"};
 char * namaBulanHijriah[] = {
@@ -161,9 +161,14 @@ void jamCenter() {
   
   bool blink = now.Second() % 2;
   
-  snprintf(jam,sizeof(jam),"%02d %02d",h,m);
-
-  dwCtr(0,drawY,jam);
+//  snprintf(jam,sizeof(jam),"%02d %02d",h,m);
+//
+//  dwCtr(0,drawY,jam);
+  Disp.drawChar(75, drawY, '0' + h / 10);
+  Disp.drawChar(84, drawY, '0' + h % 10); 
+  
+  Disp.drawChar(99, drawY, '0' + m / 10);
+  Disp.drawChar(108, drawY, '0' + m % 10);
   
   Disp.drawCircle(95,drawY + 4,1,blink);
   Disp.drawCircle(95,drawY+ 11,1,blink);
@@ -177,7 +182,7 @@ void jamCenter() {
     // Gunakan F() macro sudah benar untuk hemat RAM
     Serial.printf_P(PSTR("TIME:%d,%d,%d,%d\n"), h, m, now.Second(), now.DayOfWeek());
     s = 0;
-    show = ANIM_DATE;
+    show = ANIM_CLOCK;//ANIM_DATE;
   }
   
   DoSwap = true;
@@ -560,6 +565,75 @@ void drawIqomah()  // Countdown Iqomah (9 menit)
 void blinkBlock()
 {
     static uint32_t lsRn;
+    static uint32_t lastMove = 0; 
+    static uint16_t ct = 0;
+    
+    // Titik awal, kita mulai dari pojok kiri atas
+    static int posX = 0;
+    static int posY = 0;
+    static int dirX = 1;  
+    static int dirY = 1;  
+
+    /* =============================================================
+       BATAS PANTULAN UNTUK Disp.drawText (Rata Kiri Atas)
+       Asumsi Lebar teks "00:00:00" = ~48 px, Tinggi teks = ~8 px
+       Susunan 6 panel memanjang (192 x 16)
+    ============================================================= */
+    const int minX = 0;          // Mentok layar kiri
+    const int maxX = 192 - 48;   // Mentok layar kanan (Lebar total - Lebar teks)
+    const int minY = 0;          // Mentok layar atas
+    const int maxY = 16 - 7;     // Mentok layar bawah (Tinggi total - Tinggi teks)
+
+    // Catatan: Jika panelmu 2 baris (96 x 32), ubah nilai maxX menjadi 48 (96-48) 
+    // dan maxY menjadi 24 (32-8).
+
+    const uint16_t ct_l = displayBlink[sholatNow] * 60;  
+    uint32_t noww = millis();  
+
+    RtcDateTime now = Rtc.GetDateTime();
+
+    uint8_t mnt = (ct_l - ct) / 60;
+    uint8_t scd = (ct_l - ct) % 60;
+
+    char timeBuff[9];
+    snprintf(timeBuff, sizeof(timeBuff), "%02d:%02d:%02d", now.Hour(), now.Minute(), now.Second());
+
+    // Update posisi teks setiap 50ms
+    if (noww - lastMove > 150) 
+    {
+        lastMove = noww;
+        posX += dirX;
+        posY += dirY;
+
+        // Putar balik arah jika menabrak batas
+        if (posX <= minX || posX >= maxX) dirX = -dirX;
+        if (posY <= minY || posY >= maxY) dirY = -dirY;
+    }
+    
+    fType(1); // Pastikan ini mengatur ke font 5x7 
+    
+    // Cetak teks menggunakan Disp.drawText dengan posisi X dan Y yang bergerak
+    Disp.drawText(posX, posY, timeBuff); 
+    DoSwap = true;
+      
+    if (noww - lsRn > 1000)
+    {
+        lsRn = noww;
+        ct++;
+    }
+
+    if (ct > ct_l)
+    {
+        sholatNow = -1;
+        adzan = false;
+        ct = 0;
+        show = ANIM_CLOCK;
+    }
+}
+
+/*void blinkBlock()
+{
+    static uint32_t lsRn;
     static uint16_t ct = 0;
     const uint16_t ct_l = displayBlink[sholatNow] * 60;  // Durasi countdown
     uint32_t noww = millis();  // Simpan millis()
@@ -594,7 +668,7 @@ void blinkBlock()
         ct = 0;
         show = ANIM_CLOCK;
     }
-}
+}*/
 //===================================== end =================================//
 
 
