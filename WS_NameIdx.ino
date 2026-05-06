@@ -30,7 +30,7 @@ char * PASARAN()
   }
 
 char * showTanggal(){
-  static char buff_date[60];
+  static char buff_date[70];
 
    RtcDateTime now = Rtc.GetDateTime();
     
@@ -47,11 +47,3 @@ char * showTanggal(){
 
     return buff_date;
 }
-
-//void tampilkanVolume() {
-//  char buff[15];
-//  snprintf(buff, sizeof(buff), "%s=%02d", "VOLUME", volume);
-//  fType(1); 
-//  dwCtr(0,4,buff); //tulisan nama
-//  DoSwap  = true ;
-//}

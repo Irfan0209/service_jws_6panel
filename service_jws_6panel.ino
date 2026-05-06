@@ -102,15 +102,6 @@ bool       butuhHitungJadwal = true;
 bool       DoSwap          = false;
 bool       panelState = false; // false = OFF, true = ON
 
-//bool showVolumeTemp = false;
-//uint32_t volumeDisplayMillis = 0;
-//constexpr uint16_t volumeDisplayDuration = 2000; // 1 detik
-//
-//constexpr uint8_t MAX_VOLUME = 25;
-//constexpr uint8_t MIN_VOLUME = 0;
-
-//byte volume = 10;
-
 /*============== end ================*/
 
 enum Show{
@@ -126,18 +117,10 @@ enum Show{
   ANIM_ADZAN,
   ANIM_IQOMAH,
   ANIM_BLINK,
-  ANIM_TEST
+  ANIM_TEST,
+  ANIM_COUNTER
 };
 Show show = ANIM_CLOCK;
-
-//enum Line{
-//  ANIM_ZONK,
-//  ANIM_SHOLAT,
-//  ANIM_MASEHI,
-//  ANIM_DAY_NASIONAL,
-//  ANIM_DAY_PASARAN
-//};
-//Line line = ANIM_ZONK;
 
 #define EEPROM_SIZE       2000
 
@@ -349,7 +332,7 @@ void loop()
     break;
 
     case ANIM_DATE :
-        animasi2();
+        dwMrq(showTanggal(),config.speedDate,2,1);
     break;
 
     case ANIM_SHOLAT :

@@ -13,94 +13,98 @@ char * namaBulanHijriah[] = {
     "DZULQA'DAH", "DZULHIJAH"
 };
 
-
-uint16_t sholatSec[5];   // waktu sholat (detik)
-//===================== convert jam & menit ke detik =============================//
-inline uint32_t toSecond(uint8_t h, uint8_t m, uint8_t s = 0)
-{
-  return (uint32_t)h * 3600UL + (uint32_t)m * 60UL + s;
-}
-
-
 //==================== animasi jam dan running text =================//
 
-void dwMrq(const char* msg, uint8_t Speed, uint8_t dDT,uint8_t fontt) //running teks ada jam nya
-  { 
-    static uint16_t   x; 
-    static uint16_t fullScroll = 0;
-    //if(adzan) return;
-    if (reset_x !=0) { x=0; reset_x = 0; fullScroll = 0;}      
+void dwMrq(const char* msg, uint8_t Speed, uint8_t dDT, uint8_t fontt) { 
+  static uint16_t x; 
+  static uint16_t fullScroll = 0;
+  
+  // if(adzan) return;
 
-    uint32_t          Tmr = millis();
-    static uint32_t lss=0;
-    RtcDateTime now = Rtc.GetDateTime();
-    
-    fType(fontt);
-    uint16_t w = Disp.textWidth(msg);
-    if (w == 0) {
-       nextShowState();
-       return;
-    }
-    fullScroll = w + DWidth;
-      
-    if((Tmr-lss)> Speed)
-      { lss=Tmr;
-        if (x < fullScroll) {++x;}
-        else {
-          nextShowState();
-          x = 0; 
-          fullScroll = 0;
-          return;}
-     if(dDT==1)
-        {
-        //fType(1);  //Marquee    jam yang tampil di bawah
-        Disp.drawText(DWidth - x, 0, msg); //runing teks diatas
+  if (reset_x != 0) { 
+    x = 0; 
+    reset_x = 0; 
+    fullScroll = 0;
+  }      
 
-        if (x<=6)                     {fType(1); dwCtr(32, 16-x, TGLMASEHI());}
-        else if (x>=(fullScroll-6))   {fType(1); dwCtr(32, 16-(fullScroll-x), TGLMASEHI());}
-        else                          {fType(1); dwCtr(32,9,TGLMASEHI());}//posisi jamnya yang bawah
+  uint32_t Tmr = millis();
+  static uint32_t lss = 0;
+  
+  // HAPUS: RtcDateTime now = Rtc.GetDateTime(); -> Tidak dipakai sama sekali
 
-        if (x<=16)                     {Center(0,16-x); }
-        else if (x>=(fullScroll-16))   {Center(0,16-(fullScroll-x));}
-        else                           { Center(0,0); }//posisi jamnya yang bawah
-   
-        }
-     else if(dDT==2) //jam yang diatas
-        {    
-        Disp.drawText(DWidth - x, 9 , msg);//runinng teks dibawah
+  // Eksekusi HANYA jika waktunya update frame (sesuai Speed)
+  if ((Tmr - lss) > Speed) { 
+    lss = Tmr;
 
-        if (x<=6)                     { fType(1); dwCtr(32, x-6, TGLMASEHI());}
-        else if (x>=(fullScroll-6))   { fType(1); dwCtr(32, (fullScroll-x)-6, TGLMASEHI());}
-        else                          { fType(1); dwCtr(32,0,TGLMASEHI());}//posisi jamnya yang bawah
-
-        if (x<=16)                    { Center(0,x-16); }
-        else if (x>=(fullScroll-16))   { Center(0,(fullScroll-x)-16); }
-        else                          { Center(0, 0); }//posisi jamnya yang bawah
-        
-        }
-      else if(dDT==3) //jam yang diatas
-      { 
-        fType(fontt);  //Marquee    jam yang tampil di bawah
-        Disp.drawText(DWidth - x, 0, msg); //runing teks diatas
-        if (x<=32)                     {Center(x-32,0); }
-        else if (x>=(fullScroll-32))   {Center((fullScroll-x)-32,0);}
-        else                           {Center(0, 0); }//posisi jamnya yang bawah
+    // 1. OPTIMASI KALKULASI: Hitung lebar teks SEKALI SAJA saat animasi mau mulai
+      fType(fontt);
+      uint16_t w = Disp.textWidth(msg);
+      if (w == 0) {
+        nextShowState();
+        return;
       }
-        DoSwap = true;
-      }       
-  }   
+      fullScroll = w + DWidth;
+
+    // 2. Logika Increment X
+    if (x < fullScroll) {
+      ++x;
+    } else {
+      nextShowState();
+      x = 0; 
+      fullScroll = 0;
+      return; // Keluar agar tidak menggambar frame yang tidak perlu
+    }
+
+    // 3. Render UI berdasarkan mode dDT
+    if (dDT == 1) { // Jam di bawah, Running Text di atas
+      fType(fontt);
+      Disp.drawText(DWidth - x, 0, msg);
+
+      fType(1); // Set font SEKALI saja untuk semua kondisi TGLMASEHI di bawah ini
+      if (x <= 6)                      { dwCtr(32, 16 - x, TGLMASEHI()); }
+      else if (x >= (fullScroll - 6))  { dwCtr(32, 16 - (fullScroll - x), TGLMASEHI()); }
+      else                             { dwCtr(32, 9, TGLMASEHI()); }
+
+      if (x <= 16)                     { Center(0, 16 - x); }
+      else if (x >= (fullScroll - 16)) { Center(0, 16 - (fullScroll - x)); }
+      else                             { Center(0, 0); }
+    }
+    else if (dDT == 2) { // Jam di atas, Running Text di bawah
+      fType(fontt);
+      Disp.drawText(DWidth - x, 9, msg);
+
+      fType(1); // Set font SEKALI saja untuk semua kondisi TGLMASEHI di bawah ini
+      if (x <= 6)                      { dwCtr(32, x - 6, TGLMASEHI()); }
+      else if (x >= (fullScroll - 6))  { dwCtr(32, (fullScroll - x) - 6, TGLMASEHI()); }
+      else                             { dwCtr(32, 0, TGLMASEHI()); }
+
+      if (x <= 16)                     { Center(0, x - 16); }
+      else if (x >= (fullScroll - 16)) { Center(0, (fullScroll - x) - 16); }
+      else                             { Center(0, 0); }
+    }
+    else if (dDT == 3) { // Mode 3: Running text di atas, animasi jam di tengah horizontal
+      fType(fontt);
+      Disp.drawText(DWidth - x, 0, msg);
+      
+      if (x <= 32)                     { Center(x - 32, 0); }
+      else if (x >= (fullScroll - 32)) { Center((fullScroll - x) - 32, 0); }
+      else                             { Center(0, 0); }
+    }
+    
+    DoSwap = true;
+  }       
+}
 
 void nextShowState()
 { 
   switch(show){
-    //case ANIM_DATE:    show = ANIM_TEXT1; break;
+    case ANIM_DATE:    show = ANIM_TEXT1; break;
     case ANIM_TEXT1:   show = ANIM_TEXT2; break;
     case ANIM_TEXT2:   show = ANIM_TEXT3; break;
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
     case ANIM_TEXT5:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:   show = ANIM_CLOCK; break;
-    //case ANIM_COUNTER: show = ANIM_BIGFONT; break;
   }
 }
 
@@ -126,22 +130,28 @@ void Center(int8_t x,int8_t y){
   
   Disp.drawChar(x + 18, y, '0' + now.Minute() / 10);
   Disp.drawChar(x + 25, y, '0' + now.Minute() % 10);
-  //DoSwap = true;
 }
 
 void jamCenter() {
   if (adzan) return;
   
-  char jam[10];
   static byte y;
   static bool s; // 0=in, 1=out
   static uint32_t lsRn;
-  //static uint8_t lastSec; // Simpan detik terakhir
+  
+  // Tambahan untuk optimasi CPU
+  static RtcDateTime now;
+  static uint32_t lastRtcRead; 
+  
   uint32_t Tmr = millis();
 
-  // 1. Ambil waktu hanya jika diperlukan (misal: saat detik berubah atau animasi jalan)
-  RtcDateTime now = Rtc.GetDateTime();
-  
+  // 1. OPTIMASI: Baca RTC HANYA setiap 1 detik (1000 ms) atau saat animasi baru mulai (y==0)
+  // Ini akan menghemat resource CPU secara drastis!
+  if ((Tmr - lastRtcRead) >= 1000 || y == 0) { 
+    now = Rtc.GetDateTime();
+    lastRtcRead = Tmr;
+  }
+
   // 2. Cache kalkulasi posisi Y
   int8_t drawY = 17 - y;
 
@@ -152,31 +162,31 @@ void jamCenter() {
 
   fType(5);
 
-  // 3. Optimasi Gambar: Gunakan variabel lokal untuk digit agar tidak hitung berulang
+  // 3. Variabel lokal
   uint8_t h = now.Hour();
   uint8_t m = now.Minute();
-  
   bool blink = now.Second() % 2;
   
-  icon1(165, y - 17);
-  icon2(5, y - 17);
-  
+  // Gambar Jam
   Disp.drawChar(75, drawY, '0' + h / 10);
   Disp.drawChar(84, drawY, '0' + h % 10); 
   
   Disp.drawChar(99, drawY, '0' + m / 10);
   Disp.drawChar(108, drawY, '0' + m % 10);
   
-  Disp.drawCircle(95,drawY + 4,1,blink);
-  Disp.drawCircle(95,drawY+ 11,1,blink);
+  // Titik dua (colon) yang berkedip
+  Disp.drawCircle(95, drawY + 4, 1, blink);
+  Disp.drawCircle(95, drawY + 11, 1, blink);
       
-
-  // 4. Logika Transisi
+  // Animasi Ikon
+  icon1(165, y - 17);
+  icon2(5, y - 17);
+  
+  // 4. Logika Transisi (Tahan 5 detik sebelum keluar)
   if ((Tmr - lsRn) > 5000 && y == 17) { s = 1; }
   
   if (y == 0 && s == 1) {
     Disp.clear();
-    // Gunakan F() macro sudah benar untuk hemat RAM
     Serial.printf_P(PSTR("TIME:%d,%d,%d,%d\n"), h, m, now.Second(), now.DayOfWeek());
     s = 0;
     show = ANIM_DATE;
@@ -185,79 +195,6 @@ void jamCenter() {
   DoSwap = true;
 }
 
-void animasi2(){
-   static uint16_t   x; 
-    static uint16_t fullScroll = 0;
-    if(adzan) return;
-    if (reset_x !=0) { x=0; reset_x = 0; fullScroll = 0;}      
-
-    uint32_t          Tmr = millis();
-    static uint32_t lss=0;
-    RtcDateTime now = Rtc.GetDateTime();
-    
-    fType(1);
-    uint16_t w = Disp.textWidth(showTanggal());
-    fullScroll = w + DWidth;
-      
-    if((Tmr-lss)> 45)
-      { lss=Tmr;
-        if (x < fullScroll) {++x;}
-        else {
-          show = ANIM_TEXT1;
-          x = 0; 
-          fullScroll = 0;
-          return;}
-     Disp.drawText(DWidth - x, 9, showTanggal()); //runing teks diatas
-        
-        if (x<=6)                     { fType(1); dwCtr(32, x-6, TGLMASEHI());}
-        else if (x>=(fullScroll-6))   { fType(1); dwCtr(32, (fullScroll-x)-6, TGLMASEHI());}
-        else                          { fType(1); dwCtr(32,0,TGLMASEHI());}//posisi jamnya yang bawah
-
-        if (x<=16)                    { Center(0,x-16); }
-        else if (x>=(fullScroll-16))   { Center(0,(fullScroll-x)-16); }
-        else                          { Center(0,0); }//posisi jamnya yang bawah
-      
-        DoSwap = true;
-      }
-}
-
-void animasi3(){
-  static uint16_t   x; 
-    static uint16_t fullScroll = 0;
-    if(adzan) return;
-    if (reset_x !=0) { x=0; reset_x = 0; fullScroll = 0;}      
-
-    uint32_t          Tmr = millis();
-    static uint32_t lss=0;
-    RtcDateTime now = Rtc.GetDateTime();
-    
-    fType(1);
-    uint16_t w = Disp.textWidth(config.name);
-
-    fullScroll = w + DWidth;
-      
-    if((Tmr-lss)> config.speedName)
-      { lss=Tmr;
-        if (x < fullScroll) {++x;}
-        else {
-          show = ANIM_CLOCK;
-          x = 0; 
-          fullScroll = 0;
-          return;}
-         Disp.drawText(DWidth - x, 0, config.name); //runing teks diatas
-        
-        if (x<=6)                     {fType(1); dwCtr(32, 16-x, TGLMASEHI());}
-        else if (x>=(fullScroll-6))   {fType(1); dwCtr(32, 16-(fullScroll-x), TGLMASEHI());}
-        else                          {fType(1); dwCtr(32,9,TGLMASEHI());}//posisi jamnya yang bawah
-
-        if (x<=16)                     {Center(0, 16-x); }
-        else if (x>=(fullScroll-16))   {Center(0,16-(fullScroll-x));}
-        else                           { Center(0,0); }//posisi jamnya yang bawah
-      
-      
-        DoSwap = true;
-      }
-}
 //=======================
 void drawJadwalSholat() {
   if(adzan) return;
@@ -378,57 +315,6 @@ float getJWSValue(uint8_t index) {
 }
 //=======================
 
-void runn(const char* msg, uint8_t speed, uint8_t fontt)
-{
-  if(adzan) return;
-  
-  
-  static uint32_t x = 0;
-  static uint32_t fullScroll = 0;
-  static uint32_t lastMs = 0;
-
-  if(reset_x){
-    x = 0;
-    fullScroll = 0;
-    lastMs = 0;
-    reset_x = 0;
-  }
-  
-  // ====== Pesan baru → reset animasi ======
-
-  fType(fontt);
-  // ====== Pesan kosong → langsung lompat ======
-  uint16_t w = Disp.textWidth(msg);
-  if (w == 0) {
-    //nextShowState();
-    return;
-  }
-
-  // ====== Hitung panjang scroll hanya sekali ======
-    fullScroll = w + DWidth;
-
-  uint32_t now = millis();
-  if (now - lastMs < speed) return;
-  lastMs = now;
-
-  // ====== Animasi scroll ======
-  if (x < fullScroll) {
-    x++;
-  } else {
-    x = 0;
-    fullScroll = 0;
-    //nextShowState();
-    return;
-  }
-
-  Disp.drawText(
-    DWidth - x,
-    (fontt == 5) ? 0 : 8,
-    msg
-  );
-  DoSwap = true;
-}
-
 void drawTestPanel() {
     static uint32_t lastTestUpdate = 0;
     static uint8_t testStep = 0;
@@ -451,23 +337,23 @@ void drawTestPanel() {
             // Layar dibiarkan kosong karena sudah di-clear di atas
             testStep = 2;
         }
-//        else if (testStep == 2) {
-//            // STEP 3: Pola Garis Horizontal (Untuk cek kestabilan jalur data IC)
-//            for (int y = 0; y < DHeight; y += 2) {
-//                Disp.drawLine(0, y, DWidth, y);
-//            }
-//            testStep = 3;
-//        }
-//        else if (testStep == 3) {
-//            // STEP 4: Pola Garis Vertikal
-//            for (uint8_t x = 0; x < DWidth; x += 4) {
-//                Disp.drawLine(x, 0, x, DHeight);
-//            }
-//            testStep = 0;
-//        }
         else if (testStep == 2) {
+            // STEP 3: Pola Garis Horizontal (Untuk cek kestabilan jalur data IC)
+            for (int y = 0; y < DHeight; y += 2) {
+                Disp.drawLine(0, y, DWidth, y);
+            }
+            testStep = 3;
+        }
+        else if (testStep == 3) {
+            // STEP 4: Pola Garis Vertikal
+            for (uint8_t x = 0; x < DWidth; x += 4) {
+                Disp.drawLine(x, 0, x, DHeight);
+            }
+            testStep = 4;
+        }
+        else if (testStep == 4) {
             // STEP 5: Pola Blok IC Shift Register 74HC595 (Sumbu X)
-            for (int x = 0; x < DWidth; x += 8) {
+            for (uint8_t x = 0; x < DWidth; x += 8) {
                 if ((x / 8) % 2 == 0) {
                     // Parameter dirubah menjadi (x1, y1, x2, y2)
                     // x2 diisi dengan (x + 7) agar lebarnya selalu 8 piksel
@@ -475,13 +361,13 @@ void drawTestPanel() {
                     Disp.drawFilledRect(x, 0, x + 7, DHeight - 1);
                 }
             }
-            testStep = 3; // Lanjut ke step 6
+            testStep = 5; // Lanjut ke step 6
         }
-        else if (testStep == 3) {
+        else if (testStep == 5) {
             // STEP 6: Pola Cek IC Decoder 74HC138 (Sumbu Y - 1/4 Scan)
             // Menggambar garis horizontal setiap kelipatan 4 baris
             // (Mewakili baris ke 0, 4, 8, dan 12)
-            for (int y = 0; y < DHeight; y += 4) {
+            for (uint8_t y = 0; y < DHeight; y += 4) {
                 // Ubah DWidth menjadi (DWidth - 1) agar garis mentok di piksel terakhir
                 Disp.drawLine(0, y, DWidth - 1, y);
             }
@@ -596,20 +482,20 @@ void blinkBlock()
     static uint16_t ct = 0;
     
     // Titik awal, kita mulai dari pojok kiri atas
-    static int posX = 0;
-    static int posY = 0;
-    static int dirX = 1;  
-    static int dirY = 1;  
+    static int16_t posX = 0;
+    static int16_t posY = 0;
+    static int16_t dirX = 1;  
+    static int16_t dirY = 1;  
 
     /* =============================================================
        BATAS PANTULAN UNTUK Disp.drawText (Rata Kiri Atas)
        Asumsi Lebar teks "00:00:00" = ~48 px, Tinggi teks = ~8 px
        Susunan 6 panel memanjang (192 x 16)
     ============================================================= */
-    const int minX = 0;          // Mentok layar kiri
-    const int maxX = 192 - 48;   // Mentok layar kanan (Lebar total - Lebar teks)
-    const int minY = 0;          // Mentok layar atas
-    const int maxY = 16 - 7;     // Mentok layar bawah (Tinggi total - Tinggi teks)
+    constexpr uint8_t minX = 0;          // Mentok layar kiri
+    constexpr uint8_t maxX = 192 - 48;   // Mentok layar kanan (Lebar total - Lebar teks)
+    constexpr uint8_t minY = 0;          // Mentok layar atas
+    constexpr uint8_t maxY = 16 - 7;     // Mentok layar bawah (Tinggi total - Tinggi teks)
 
     // Catatan: Jika panelmu 2 baris (96 x 32), ubah nilai maxX menjadi 48 (96-48) 
     // dan maxY menjadi 24 (32-8).

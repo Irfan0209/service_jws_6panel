@@ -13,11 +13,7 @@ void islam() {
     stateBuzzWar = 1;
   }
 
-  // --- PEMICU TENGAH MALAM (Ganti Hari) ---
-  // Pastikan jadwal dihitung ulang setiap jam 00:00:01
-  static int8_t lastDayCalc = -1;
-  if (now.Day() != lastDayCalc) {
-    lastDayCalc = now.Day();
+  if (now.Minute() == 0 && now.Second() == 0){
     butuhHitungJadwal = true; 
   }
 
