@@ -27,17 +27,23 @@ void islam() {
 
   // --- EKSEKUSI RUMUS HANYA JIKA FLAG AKTIF ---
   if(butuhHitungJadwal){
-    JWS.Update(config.zonawaktu, config.latitude, config.longitude, config.altitude, now.Year(), now.Month(), now.Day());
-    JWS.setIkhtiSu = dataIhty[0];
-    JWS.setIkhtiDzu = dataIhty[1];
-    JWS.setIkhtiAs = dataIhty[2];
-    JWS.setIkhtiMa = dataIhty[3];
-    JWS.setIkhtiIs = dataIhty[4];
-    JWS.setIkhtiIm = dataIhty[5];
-    Hijir.Update(now.Year(), now.Month(), now.Day(), config.Correction);
-
-    butuhHitungJadwal = false; // Matikan flag setelah selesai menghitung agar CPU kembali santai
-    Serial.println(F("[INFO] Jadwal Sholat dan Hijriah Berhasil Dikalkulasi Ulang!"));
+    // Menggunakan perulangan for untuk eksekusi 2 kali
+    for(int i = 0; i < 2; i++) {
+      JWS.Update(config.zonawaktu, config.latitude, config.longitude, config.altitude, now.Year(), now.Month(), now.Day());
+      JWS.setIkhtiSu = dataIhty[0];
+      JWS.setIkhtiDzu = dataIhty[1];
+      JWS.setIkhtiAs = dataIhty[2];
+      JWS.setIkhtiMa = dataIhty[3];
+      JWS.setIkhtiIs = dataIhty[4];
+      JWS.setIkhtiIm = dataIhty[5];
+      Hijir.Update(now.Year(), now.Month(), now.Day(), config.Correction);
+      
+//      Serial.print(F("[INFO] Kalkulasi ke-"));
+//      Serial.println(i + 1);
+    }
+    
+    butuhHitungJadwal = false; // Matikan flag setelah kedua eksekusi selesai
+//    Serial.println(F("[INFO] Jadwal Sholat dan Hijriah Berhasil Dikalkulasi Ulang (2x)!"));
   }
 }
 

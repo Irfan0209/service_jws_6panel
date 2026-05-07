@@ -344,7 +344,7 @@ void loop()
     break;
 
     case ANIM_TEXT2 :
-        dwMrq(config.text2,config.speedText2,1,1);
+        dwMrq(config.text2,config.speedText2,2,1);
     break;
 
     case ANIM_TEXT3 :
@@ -352,7 +352,7 @@ void loop()
     break;
 
     case ANIM_TEXT4 :
-        dwMrq(config.text4,config.speedText4,1,1);
+        dwMrq(config.text4,config.speedText4,2,1);
     break;
 
     case ANIM_TEXT5 :
