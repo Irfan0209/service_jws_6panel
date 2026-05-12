@@ -103,7 +103,8 @@ void nextShowState()
     case ANIM_TEXT2:   show = ANIM_TEXT3; break;
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
-    case ANIM_TEXT5:   show = ANIM_SHOLAT; break;
+    case ANIM_TEXT5:   (JUMAT)?show = ANIM_JUMAT : show = ANIM_SHOLAT; break;
+    case ANIM_JUMAT:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:   show = ANIM_CLOCK; break;
   }
 }
@@ -401,6 +402,7 @@ void icon2 (uint8_t x, uint8_t y){
   Disp.drawBitmap(x,y,icon2);
 }
 
+
 /*======================= animasi memasuki waktu sholat ====================================*/
 void drawAzzan()
 {
@@ -427,7 +429,7 @@ void drawAzzan()
           Buzzer(0);
         }
         ct++;
-        DoSwap = true;
+        //DoSwap = true;
     }
     
     if ((Tmr - lsRn) > 1500 && (ct > limit))
@@ -436,6 +438,57 @@ void drawAzzan()
         ct = 0;
         Buzzer(0);
     }
+}
+
+void runn(const char* msg, uint8_t speed, uint8_t fontt)
+{
+  if(adzan) return;
+  
+  
+  static uint32_t x = 0;
+  static uint32_t fullScroll = 0;
+  static uint32_t lastMs = 0;
+
+  if(reset_x){
+    x = 0;
+    fullScroll = 0;
+    lastMs = 0;
+    reset_x = 0;
+  }
+  
+  // ====== Pesan baru → reset animasi ======
+
+  fType(fontt);
+  // ====== Pesan kosong → langsung lompat ======
+  uint16_t w = Disp.textWidth(msg);
+  if (w == 0) {
+    //nextShowState();
+    return;
+  }
+
+  // ====== Hitung panjang scroll hanya sekali ======
+    fullScroll = w + DWidth;
+
+  uint32_t now = millis();
+  if (now - lastMs < speed) return;
+  lastMs = now;
+
+  // ====== Animasi scroll ======
+  if (x < fullScroll) {
+    x++;
+  } else {
+    x = 0;
+    fullScroll = 0;
+    //nextShowState();
+    return;
+  }
+
+  Disp.drawText(
+    DWidth - x,
+    (fontt == 5) ? 0 : 8,
+    msg
+  );
+  DoSwap = true;
 }
 
 void drawIqomah()  // Countdown Iqomah (9 menit)
@@ -454,7 +507,7 @@ void drawIqomah()  // Countdown Iqomah (9 menit)
 
    // if ((ct & 1) == 0) {  // Gunakan bitwise untuk optimasi modulo 2
     fType(1);
-    dwCtr(0, 4, locBuff);
+    dwCtr(0, 8, locBuff);
     DoSwap = true;
     
     if (now - lsRn > 1000) 

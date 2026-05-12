@@ -1,3 +1,20 @@
+bool cekJadwalJumat(uint8_t jamNow, uint8_t menitNow,uint8_t dayy) {
+  //RtcDateTime now = Rtc.GetDateTime();
+  // Asumsi hari ke-5 atau ke-6 adalah Jumat (Tergantung library RTC kamu, biasanya 5 = Jumat)
+  if (dayy != 5) return false; 
+  
+  uint16_t waktuSekarang = (jamNow * 60) + menitNow;
+  uint16_t waktuMulai = (config.jumatMulaiJam * 60) + config.jumatMulaiMenit;
+  uint16_t waktuSelesai = (config.jumatSelesaiJam * 60) + config.jumatSelesaiMenit;
+
+  // Jika waktu sekarang berada di dalam rentang jadwal
+  if (waktuSekarang >= waktuMulai && waktuSekarang < waktuSelesai) {
+    return true;
+  }
+  else 
+  return false;
+}
+
 
 void cekJadwalPanel(uint8_t jamNow, uint8_t menitNow) {
   if(!config.stateAlarm) return;

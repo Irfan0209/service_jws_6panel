@@ -6,6 +6,8 @@
 char ssid[20]     = "JAM_PANEL";
 char password[20] = "00000000";
 
+#define PIN_LED 2
+
 ESP8266WebServer server(80);
 WebSocketsServer webSocket(81);
 
@@ -19,6 +21,11 @@ bool modeOTA = false;
 bool stateRestart  = false;
 String pass;
 bool passwordReady = false;
+
+static uint8_t m_Counter = 0;
+constexpr uint16_t waveStepDelay = 10;  // Delay antar frame LED breathing (ms)
+static uint32_t lastWaveMillis = 0;
+
 
 void getData(const char* input) {
   Serial.println(input);
@@ -416,9 +423,11 @@ void waitPasswordFromESP8266() {
 //  Serial.println(password);
 }
 
+
 void setup() {
   Serial.begin(9600);
-
+  pinMode(PIN_LED,OUTPUT);
+  
   waitPasswordFromESP8266();  // ⬅️ GATE WAJIB
 
   AP_init();                  // baru jalan SETELAH password siap
@@ -430,6 +439,7 @@ void loop() {
     webSocket.loop();
     cekSerialMonitor();
     Restart(pass.c_str());
+    getStatusRun();
 }
 
 void Restart(const char* msg){
@@ -444,4 +454,25 @@ void Restart(const char* msg){
     delay(100);
     ESP.restart();
   }
+}
+
+//============= ANIMASI LED =============//
+void getStatusRun() {
+  uint32_t now = millis();
+  if (now - lastWaveMillis >= waveStepDelay) {
+    lastWaveMillis = now;
+    updateWaveLED();
+  }
+}
+
+void updateWaveLED() {
+  // brightness naik turun dari 0 - 255 - 0
+  uint8_t brightness = (m_Counter < 128) ? m_Counter * 2 : (255 - m_Counter) * 2;
+  setLED(brightness);
+
+  m_Counter = (m_Counter + 1) % 256;  // loop kembali ke 0 setelah 255
+}
+
+void setLED(uint8_t brightness) {
+  analogWrite(PIN_LED, brightness);
 }

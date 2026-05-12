@@ -4,6 +4,7 @@ void islam() {
   RtcDateTime now = Rtc.GetDateTime();
   
   cekJadwalPanel(now.Hour(), now.Minute());
+  JUMAT = cekJadwalJumat(now.Hour(), now.Minute(),now.DayOfWeek());
 
   static int8_t lastHalfPlay = -1;
 

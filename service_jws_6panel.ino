@@ -63,6 +63,7 @@ struct Config {
   uint8_t    speedText3;
   uint8_t    speedText4;
   uint8_t    speedText5;
+  uint8_t    speedTextJumat;
   uint8_t    speedName;
   bool       stateMode;
   bool       stateBuzzerClock;
@@ -73,12 +74,18 @@ struct Config {
   uint8_t    jamOff ;
   uint8_t    menitOn ;
   uint8_t    menitOff ;
+  uint8_t    jumatMulaiJam = 10;
+  uint8_t    jumatMulaiMenit = 30;
+  uint8_t    jumatSelesaiJam = 12;
+  uint8_t    jumatSelesaiMenit = 0;
   char text1[250];
   char text2[250];
   char text3[250];
   char text4[250];
   char text5[250];
   char name[250];
+  char textIqomah[250];
+  char textJumat[250];
   char ctrJadwal[30];
   
 };
@@ -89,6 +96,7 @@ uint8_t    DHeight       = Disp.height();
 
 // Variabel untuk waktu, tanggal, teks berjalan, tampilan ,dan kecerahan
 bool       adzan         = 0;
+bool       JUMAT         = 0;
 int8_t     sholatNow     = -1;
 bool       reset_x       = 0; 
 
@@ -114,6 +122,7 @@ enum Show{
   ANIM_TEXT5,
   ANIM_NAME,
   ANIM_DATE,
+  ANIM_JUMAT,
   ANIM_ADZAN,
   ANIM_IQOMAH,
   ANIM_BLINK,
@@ -339,6 +348,10 @@ void loop()
         drawJadwalSholat();
     break;
 
+    case ANIM_JUMAT :
+        dwMrq(config.textJumat,config.speedTextJumat,2,1);
+    break;
+
     case ANIM_TEXT1 :
         dwMrq(config.text1,config.speedText1,1,1);
     break;
@@ -373,6 +386,7 @@ void loop()
     break;
 
     case ANIM_IQOMAH :
+      runn(config.textIqomah,40,1);
       drawIqomah();
     break;
 
