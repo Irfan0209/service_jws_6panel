@@ -63,7 +63,8 @@ struct Config {
   uint8_t    speedText3;
   uint8_t    speedText4;
   uint8_t    speedText5;
-  uint8_t    speedTextJumat;
+  uint8_t    speedTextJumat = 40;
+  uint8_t    speedTextIqomah = 40;
   uint8_t    speedName;
   bool       stateMode;
   bool       stateBuzzerClock;
@@ -74,18 +75,18 @@ struct Config {
   uint8_t    jamOff ;
   uint8_t    menitOn ;
   uint8_t    menitOff ;
-  uint8_t    jumatMulaiJam = 10;
+  uint8_t    jumatMulaiJam = 11;
   uint8_t    jumatMulaiMenit = 30;
-  uint8_t    jumatSelesaiJam = 12;
-  uint8_t    jumatSelesaiMenit = 0;
+  uint8_t    jumatSelesaiJam = 11;
+  uint8_t    jumatSelesaiMenit = 33;
   char text1[250];
   char text2[250];
   char text3[250];
   char text4[250];
   char text5[250];
   char name[250];
-  char textIqomah[250];
-  char textJumat[250];
+  char textIqomah[250]="Nawaitu iktikafasunnatanlilahitaalla";
+  char textJumat[250]="WAKTU KHOTBAH HARAP TENANG";
   char ctrJadwal[30];
   
 };
@@ -183,6 +184,12 @@ Show show = ANIM_CLOCK;
 #define ADDR_MENITOFF     1571   // 1
 
 #define ADDR_STATEALARM   1572   // 1
+
+#define ADDR_JAMONJUMAT     1573
+#define ADDR_MENITONJUMAT   1574
+
+#define ADDR_JAMOFFJUMAT     1575
+#define ADDR_MENITOFFJUMAT   1576
 
 //#define ADDR_TESTPANEL    1573   // 1
 
@@ -386,7 +393,7 @@ void loop()
     break;
 
     case ANIM_IQOMAH :
-      runn(config.textIqomah,40,1);
+      runn(config.textIqomah,config.speedTextIqomah,1);
       drawIqomah();
     break;
 
@@ -612,6 +619,35 @@ void getData(const char* data) {
         }
       }
     } 
+
+    //alarm text jumat
+    else if (key_len == 7 && strncmp(data, "jumatOn", 7) == 0) {
+      uint8_t h = atoi(ptr);
+      ptr = strchr(ptr, ':'); 
+      if (ptr) {
+        uint8_t m = atoi(ptr + 1);
+        if (h <= 23 && m <= 59) {
+          config.jumatMulaiJam = h;
+          config.jumatMulaiMenit = m;
+          saveIntToEEPROM(ADDR_JAMONJUMAT, config.jumatMulaiJam);
+          saveIntToEEPROM(ADDR_MENITONJUMAT, config.jumatMulaiMenit);
+        }
+      }
+    } 
+
+    else if (key_len == 8 && strncmp(data, "jumatOff", 8) == 0) {
+      uint8_t h = atoi(ptr);
+      ptr = strchr(ptr, ':'); 
+      if (ptr) {
+        uint8_t m = atoi(ptr + 1);
+        if (h <= 23 && m <= 59) {
+          config.jumatSelesaiJam = h;
+          config.jumatSelesaiMenit = m;
+          saveIntToEEPROM(ADDR_JAMOFFJUMAT, config.jumatSelesaiJam);
+          saveIntToEEPROM(ADDR_MENITOFFJUMAT, config.jumatSelesaiMenit);
+        }
+      }
+    } 
     
     else if (key_len == 4 && strncmp(data, "mode", 4) == 0) {
       config.stateMode = atoi(ptr);
@@ -772,6 +808,14 @@ void loadFromEEPROM() {
 
   config.menitOff = EEPROM.read(ADDR_MENITOFF);
 
+  config.jumatMulaiJam = EEPROM.read(ADDR_JAMONJUMAT);
+
+  config.jumatMulaiMenit = EEPROM.read(ADDR_MENITONJUMAT);
+
+  config.jumatSelesaiJam = EEPROM.read(ADDR_JAMOFFJUMAT);
+
+  config.jumatSelesaiMenit = EEPROM.read(ADDR_MENITOFFJUMAT);
+
   config.stateMode = EEPROM.read(ADDR_MODE);
 
   for (uint8_t i = 0; i < 8; i++) {
@@ -834,6 +878,14 @@ void loadFromEEPROM() {
   Serial.println(config.jamOff);
   Serial.print("menitOff: ");
   Serial.println(config.menitOff);
+  Serial.print("jumatMulaiJam:");
+  Serial.println(config.jumatMulaiJam);
+  Serial.print("jumatMulaiMenit: ");
+  Serial.println(config.jumatMulaiMenit);
+  Serial.print("jumatSelesaiJam: ");
+  Serial.println(config.jumatSelesaiJam);
+  Serial.print("jumatSelesaiMenit: ");
+  Serial.println(config.jumatSelesaiMenit);
   Serial.print("mode: ");
   Serial.println(config.stateMode);
   Serial.print("Password: ");

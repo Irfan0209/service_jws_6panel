@@ -442,7 +442,7 @@ void drawAzzan()
 
 void runn(const char* msg, uint8_t speed, uint8_t fontt)
 {
-  if(adzan) return;
+  //if(adzan) return;
   
   
   static uint32_t x = 0;
@@ -484,9 +484,7 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
   }
 
   Disp.drawText(
-    DWidth - x,
-    (fontt == 5) ? 0 : 8,
-    msg
+    DWidth - x,0,msg
   );
   DoSwap = true;
 }
@@ -508,7 +506,7 @@ void drawIqomah()  // Countdown Iqomah (9 menit)
    // if ((ct & 1) == 0) {  // Gunakan bitwise untuk optimasi modulo 2
     fType(1);
     dwCtr(0, 8, locBuff);
-    DoSwap = true;
+    //DoSwap = true;
     
     if (now - lsRn > 1000) 
     {   
