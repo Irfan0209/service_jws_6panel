@@ -103,10 +103,12 @@ void nextShowState()
     case ANIM_TEXT2:   show = ANIM_TEXT3; break;
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
-    case ANIM_TEXT5:   (JUMAT)?show = ANIM_JUMAT : show = ANIM_SHOLAT; break;
-    case ANIM_JUMAT:   show = ANIM_SHOLAT; break;
-    case ANIM_NAME:   show = ANIM_CLOCK; break;
+    case ANIM_TEXT5:   (JUMAT)?show = ANIM_JUMAT1 : show = ANIM_SHOLAT; break;
+    case ANIM_JUMAT1:  (JUMAT)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
+    case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
+    case ANIM_NAME:     show = ANIM_CLOCK; break;
   }
+  Serial.println("jumat:" + String(JUMAT));
 }
 
 void Center(int8_t x,int8_t y){
@@ -434,7 +436,7 @@ void drawAzzan()
     
     if ((Tmr - lsRn) > 1500 && (ct > limit))
     {
-        show = ANIM_IQOMAH;
+        show = ANIM_IQOMAH1;
         ct = 0;
         Buzzer(0);
     }
@@ -462,7 +464,7 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
   // ====== Pesan kosong → langsung lompat ======
   uint16_t w = Disp.textWidth(msg);
   if (w == 0) {
-    //nextShowState();
+    nextShowStateRun();
     return;
   }
 
@@ -479,7 +481,7 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
   } else {
     x = 0;
     fullScroll = 0;
-    //nextShowState();
+    nextShowStateRun();
     return;
   }
 
@@ -487,6 +489,15 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
     DWidth - x,0,msg
   );
   DoSwap = true;
+}
+
+void nextShowStateRun()
+{ 
+  switch(show){
+    case ANIM_IQOMAH1:    show = ANIM_IQOMAH2; break;
+    case ANIM_IQOMAH2:   show = ANIM_IQOMAH1; break;
+    
+  }
 }
 
 void drawIqomah()  // Countdown Iqomah (9 menit)

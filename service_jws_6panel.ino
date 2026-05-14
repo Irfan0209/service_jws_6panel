@@ -63,8 +63,10 @@ struct Config {
   uint8_t    speedText3;
   uint8_t    speedText4;
   uint8_t    speedText5;
-  uint8_t    speedTextJumat = 40;
-  uint8_t    speedTextIqomah = 40;
+  uint8_t    speedTextJumat1 = 40;
+  uint8_t    speedTextJumat2 = 40;
+  uint8_t    speedTextIqomah1 = 40;
+  uint8_t    speedTextIqomah2 = 40;
   uint8_t    speedName;
   bool       stateMode;
   bool       stateBuzzerClock;
@@ -85,8 +87,10 @@ struct Config {
   char text4[250];
   char text5[250];
   char name[250];
-  char textIqomah[250]="Nawaitu iktikafasunnatanlilahitaalla";
-  char textJumat[250]="WAKTU KHOTBAH HARAP TENANG";
+  char textIqomah1[250]="Nawaitu iktikafasunnatanlilahitaalla";
+  char textIqomah2[250]="Nawaitu iktikafasunnatanlilahitaalla";
+  char textJumat1[250]="WAKTU KHOTBAH HARAP TENANG";
+  char textJumat2[250]="WAKTU KHOTBAH HARAP TENANG";
   char ctrJadwal[30];
   
 };
@@ -123,9 +127,11 @@ enum Show{
   ANIM_TEXT5,
   ANIM_NAME,
   ANIM_DATE,
-  ANIM_JUMAT,
+  ANIM_JUMAT1,
+  ANIM_JUMAT2,
   ANIM_ADZAN,
-  ANIM_IQOMAH,
+  ANIM_IQOMAH1,
+  ANIM_IQOMAH2,
   ANIM_BLINK,
   ANIM_TEST,
   ANIM_COUNTER
@@ -185,11 +191,22 @@ Show show = ANIM_CLOCK;
 
 #define ADDR_STATEALARM   1572   // 1
 
-#define ADDR_JAMONJUMAT     1573
-#define ADDR_MENITONJUMAT   1574
+#define ADDR_JAMONJUMAT     1573  //1
+#define ADDR_MENITONJUMAT   1574  //1
 
-#define ADDR_JAMOFFJUMAT     1575
-#define ADDR_MENITOFFJUMAT   1576
+#define ADDR_JAMOFFJUMAT     1575  //1
+#define ADDR_MENITOFFJUMAT   1576  //1
+
+#define ADDR_TEXTIQOMAH1     1577  //251
+#define ADDR_TEXTIQOMAH2     1828  //251
+
+#define ADDR_TEXTJUMAT1     2079  //251
+#define ADDR_TEXTJUMAT2     2330  //251
+
+#define ADDR_SPEEDTXIQ1     2581   // 2
+#define ADDR_SPEEDTXIQ2     2583   // 2
+#define ADDR_SPEEDTXJM1     2585   // 2
+#define ADDR_SPEEDTXJM2     2587   // 2
 
 //#define ADDR_TESTPANEL    1573   // 1
 
@@ -355,8 +372,12 @@ void loop()
         drawJadwalSholat();
     break;
 
-    case ANIM_JUMAT :
-        dwMrq(config.textJumat,config.speedTextJumat,2,1);
+    case ANIM_JUMAT1 :
+        dwMrq(config.textJumat1,config.speedTextJumat1,2,1);
+    break;
+
+    case ANIM_JUMAT2 :
+        dwMrq(config.textJumat2,config.speedTextJumat2,1,1);
     break;
 
     case ANIM_TEXT1 :
@@ -392,8 +413,13 @@ void loop()
       drawAzzan();
     break;
 
-    case ANIM_IQOMAH :
-      runn(config.textIqomah,config.speedTextIqomah,1);
+    case ANIM_IQOMAH1 :
+      runn(config.textIqomah1,config.speedTextIqomah1,1);
+      drawIqomah();
+    break;
+
+    case ANIM_IQOMAH2 :
+      runn(config.textIqomah2,config.speedTextIqomah2,1);
       drawIqomah();
     break;
 
@@ -468,6 +494,18 @@ void getData(const char* data) {
         } else if (indexText == 5) {
           strcpy(config.text5, tempBuffer);
           saveStringToEEPROM(ADDR_TEXT5, config.text5, 250);
+        } else if (indexText == 6) { //TEXT IQOMAH 1
+          strcpy(config.textIqomah1, tempBuffer);
+          saveStringToEEPROM(ADDR_TEXTIQOMAH1, config.textIqomah1, 250);
+        } else if (indexText == 7) { //TEXT IQOMAH 2
+          strcpy(config.textIqomah2, tempBuffer);
+          saveStringToEEPROM(ADDR_TEXTIQOMAH2, config.textIqomah2, 250);
+        } else if (indexText == 8) { //TEXT JUMAT 1
+          strcpy(config.textJumat1, tempBuffer);
+          saveStringToEEPROM(ADDR_TEXTJUMAT1, config.textJumat1, 250);
+        } else if (indexText == 9){ //TEXT JUMAT 2
+          strcpy(config.textJumat2, tempBuffer);
+          saveStringToEEPROM(ADDR_TEXTJUMAT2, config.textJumat2, 250);
         }
       }
       Buzzer(1); delay(500); ESP.restart();
@@ -502,7 +540,19 @@ void getData(const char* data) {
     } else if (key_len == 5 && strncmp(data, "Sptx5", 5) == 0) {
       config.speedText5 = map(atoi(ptr), 0, 100, 10, 80);
       saveIntToEEPROM(ADDR_SPEEDTX5, config.speedText5);
-    } 
+    } else if (key_len == 7 && strncmp(data, "Sptxiq1", 7) == 0) {
+      config.speedTextIqomah1 = map(atoi(ptr), 0, 100, 10, 80);
+      saveIntToEEPROM(ADDR_SPEEDTXIQ1, config.speedTextIqomah1);
+    } else if (key_len == 7 && strncmp(data, "Sptxiq2", 7) == 0) {
+      config.speedTextIqomah2 = map(atoi(ptr), 0, 100, 10, 80);
+      saveIntToEEPROM(ADDR_SPEEDTXIQ2, config.speedTextIqomah2);
+    } else if (key_len == 7 && strncmp(data, "Sptxjm1", 7) == 0) {
+      config.speedTextJumat1 = map(atoi(ptr), 0, 100, 10, 80);
+      saveIntToEEPROM(ADDR_SPEEDTXJM1, config.speedTextJumat1);
+    } else if (key_len == 7 && strncmp(data, "Sptxjm2", 7) == 0) {
+      config.speedTextJumat2 = map(atoi(ptr), 0, 100, 10, 80);
+      saveIntToEEPROM(ADDR_SPEEDTXJM2, config.speedTextJumat2);
+    }  
     
     else if (key_len == 4 && strncmp(data, "Spdt", 4) == 0) {
       config.speedDate = map(atoi(ptr), 0, 100, 10, 80);
@@ -728,6 +778,26 @@ void loadFromEEPROM() {
     if (config.name[i] == 0) break;
   }
 
+  for (uint8_t i = 0; i < 250; i++) {
+    config.textIqomah1[i] = EEPROM.read(ADDR_TEXTIQOMAH1 + i);
+    if (config.textIqomah1[i] == 0) break;
+  }
+
+  for (uint8_t i = 0; i < 250; i++) {
+    config.textIqomah2[i] = EEPROM.read(ADDR_TEXTIQOMAH2 + i);
+    if (config.textIqomah2[i] == 0) break;
+  }
+
+  for (uint8_t i = 0; i < 250; i++) {
+    config.textJumat1[i] = EEPROM.read(ADDR_TEXTJUMAT1 + i);
+    if (config.textJumat1[i] == 0) break;
+  }
+
+  for (uint8_t i = 0; i < 250; i++) {
+    config.textJumat2[i] = EEPROM.read(ADDR_TEXTJUMAT2 + i);
+    if (config.textJumat2[i] == 0) break;
+  }
+
   config.brightness = EEPROM.read(ADDR_BRIGHTNESS);
 
   config.speedText1 = EEPROM.read(ADDR_SPEEDTX1);
@@ -743,6 +813,16 @@ void loadFromEEPROM() {
   config.speedDate = EEPROM.read(ADDR_SPEEDDT);
 
   config.speedName = EEPROM.read(ADDR_SPEEDNAME);
+
+  config.speedTextIqomah1 = EEPROM.read(ADDR_SPEEDTXIQ1); // iqomah
+
+  config.speedTextIqomah2 = EEPROM.read(ADDR_SPEEDTXIQ2);
+
+  config.speedTextJumat1 = EEPROM.read(ADDR_SPEEDTXJM1);
+
+  config.speedTextJumat2 = EEPROM.read(ADDR_SPEEDTXJM2);
+
+  
 
   // Latitude
   float latVal;
