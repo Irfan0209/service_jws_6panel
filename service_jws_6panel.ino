@@ -31,7 +31,7 @@ JAM_DIGITAL_MASJID_MAS-YANTO 93 X 16
 #define Font6 Calibri14
 #define Font7 SystemFont5x7
 
-//#define DEBUG 1
+#define DEBUG 1
 char password[20] = "00000000";
 
 // Object Declarations
@@ -138,7 +138,7 @@ enum Show{
 };
 Show show = ANIM_CLOCK;
 
-#define EEPROM_SIZE       2000
+#define EEPROM_SIZE       3000
 
 
 // ================= TEXT (250 char) =================
@@ -679,6 +679,9 @@ void getData(const char* data) {
         if (h <= 23 && m <= 59) {
           config.jumatMulaiJam = h;
           config.jumatMulaiMenit = m;
+          Serial.print(h);
+          Serial.print(":");
+          Serial.println(m);
           saveIntToEEPROM(ADDR_JAMONJUMAT, config.jumatMulaiJam);
           saveIntToEEPROM(ADDR_MENITONJUMAT, config.jumatMulaiMenit);
         }
@@ -693,6 +696,9 @@ void getData(const char* data) {
         if (h <= 23 && m <= 59) {
           config.jumatSelesaiJam = h;
           config.jumatSelesaiMenit = m;
+          Serial.print(h);
+          Serial.print(":");
+          Serial.println(m);
           saveIntToEEPROM(ADDR_JAMOFFJUMAT, config.jumatSelesaiJam);
           saveIntToEEPROM(ADDR_MENITOFFJUMAT, config.jumatSelesaiMenit);
         }
@@ -920,6 +926,14 @@ void loadFromEEPROM() {
   Serial.println(config.text5);
   Serial.print("nama: ");
   Serial.println(config.name);
+  Serial.print("iqomah 1: ");
+  Serial.println(config.textIqomah1);
+  Serial.print("iqomah 2: ");
+  Serial.println(config.textIqomah2);
+  Serial.print("jumat 1: ");
+  Serial.println(config.textJumat1);
+  Serial.print("jumat 2: ");
+  Serial.println(config.textJumat2);
   Serial.print("Brightness: ");
   Serial.println(config.brightness);
   Serial.print("Speed Text1: ");
@@ -936,6 +950,14 @@ void loadFromEEPROM() {
   Serial.println(config.speedDate);
   Serial.print("Speed Name: ");
   Serial.println(config.speedName);
+  Serial.print("Speed Iqomah 1: ");
+  Serial.println(config.speedTextIqomah1);
+  Serial.print("Speed Iqomah 2: ");
+  Serial.println(config.speedTextIqomah2);
+  Serial.print("Speed jumat 1: ");
+  Serial.println(config.speedTextJumat1);
+  Serial.print("Speed jumat 2: ");
+  Serial.println(config.speedTextJumat2);
   Serial.print("Latitude: ");
   Serial.println(config.latitude, 6);
   Serial.print("Longitude: ");

@@ -103,8 +103,8 @@ void nextShowState()
     case ANIM_TEXT2:   show = ANIM_TEXT3; break;
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
-    case ANIM_TEXT5:   (JUMAT)?show = ANIM_JUMAT1 : show = ANIM_SHOLAT; break;
-    case ANIM_JUMAT1:  (JUMAT)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
+    case ANIM_TEXT5:   (JUMAT==1)?show = ANIM_JUMAT1 : show = ANIM_SHOLAT; break;
+    case ANIM_JUMAT1:  (JUMAT==1)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
     case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:     show = ANIM_CLOCK; break;
   }
