@@ -38,13 +38,8 @@ void islam() {
       JWS.setIkhtiIs = dataIhty[4];
       JWS.setIkhtiIm = dataIhty[5];
       Hijir.Update(now.Year(), now.Month(), now.Day(), config.Correction);
-      
-//      Serial.print(F("[INFO] Kalkulasi ke-"));
-//      Serial.println(i + 1);
     }
-    
     butuhHitungJadwal = false; // Matikan flag setelah kedua eksekusi selesai
-//    Serial.println(F("[INFO] Jadwal Sholat dan Hijriah Berhasil Dikalkulasi Ulang (2x)!"));
   }
 }
 

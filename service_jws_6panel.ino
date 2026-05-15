@@ -31,7 +31,7 @@ JAM_DIGITAL_MASJID_MAS-YANTO 93 X 16
 #define Font6 Calibri14
 #define Font7 SystemFont5x7
 
-#define DEBUG 1
+//#define DEBUG 1
 char password[20] = "00000000";
 
 // Object Declarations
@@ -63,10 +63,10 @@ struct Config {
   uint8_t    speedText3;
   uint8_t    speedText4;
   uint8_t    speedText5;
-  uint8_t    speedTextJumat1 = 40;
-  uint8_t    speedTextJumat2 = 40;
-  uint8_t    speedTextIqomah1 = 40;
-  uint8_t    speedTextIqomah2 = 40;
+  uint8_t    speedTextJumat1;
+  uint8_t    speedTextJumat2;
+  uint8_t    speedTextIqomah1;
+  uint8_t    speedTextIqomah2;
   uint8_t    speedName;
   bool       stateMode;
   bool       stateBuzzerClock;
@@ -77,20 +77,20 @@ struct Config {
   uint8_t    jamOff ;
   uint8_t    menitOn ;
   uint8_t    menitOff ;
-  uint8_t    jumatMulaiJam = 11;
-  uint8_t    jumatMulaiMenit = 30;
-  uint8_t    jumatSelesaiJam = 11;
-  uint8_t    jumatSelesaiMenit = 33;
+  uint8_t    jumatMulaiJam;
+  uint8_t    jumatMulaiMenit;
+  uint8_t    jumatSelesaiJam;
+  uint8_t    jumatSelesaiMenit;
   char text1[250];
   char text2[250];
   char text3[250];
   char text4[250];
   char text5[250];
   char name[250];
-  char textIqomah1[250]="Nawaitu iktikafasunnatanlilahitaalla";
-  char textIqomah2[250]="Nawaitu iktikafasunnatanlilahitaalla";
-  char textJumat1[250]="WAKTU KHOTBAH HARAP TENANG";
-  char textJumat2[250]="WAKTU KHOTBAH HARAP TENANG";
+  char textIqomah1[250];
+  char textIqomah2[250];
+  char textJumat1[250];
+  char textJumat2[250];
   char ctrJadwal[30];
   
 };
@@ -108,7 +108,6 @@ bool       reset_x       = 0;
 /*======library tambahan=======*/
 bool       flagAnim = false;
 float      dataFloat[10];
-//int8_t     dataInteger[10];
 bool       stateSendSholat = false; 
 bool       stateBuzzWar    = 0;
 bool       butuhHitungJadwal = true;
@@ -679,9 +678,6 @@ void getData(const char* data) {
         if (h <= 23 && m <= 59) {
           config.jumatMulaiJam = h;
           config.jumatMulaiMenit = m;
-          Serial.print(h);
-          Serial.print(":");
-          Serial.println(m);
           saveIntToEEPROM(ADDR_JAMONJUMAT, config.jumatMulaiJam);
           saveIntToEEPROM(ADDR_MENITONJUMAT, config.jumatMulaiMenit);
         }
@@ -696,9 +692,6 @@ void getData(const char* data) {
         if (h <= 23 && m <= 59) {
           config.jumatSelesaiJam = h;
           config.jumatSelesaiMenit = m;
-          Serial.print(h);
-          Serial.print(":");
-          Serial.println(m);
           saveIntToEEPROM(ADDR_JAMOFFJUMAT, config.jumatSelesaiJam);
           saveIntToEEPROM(ADDR_MENITOFFJUMAT, config.jumatSelesaiMenit);
         }
@@ -913,7 +906,7 @@ void loadFromEEPROM() {
  
   config.Correction = EEPROM.read(ADDR_CORRECTION) | (EEPROM.read(ADDR_CORRECTION + 1) << 8);
   
-#if DEBUG
+/*#if DEBUG
   Serial.print("Text1: ");
   Serial.println(config.text1);
   Serial.print("Text2: ");
@@ -996,7 +989,7 @@ void loadFromEEPROM() {
   Serial.println(config.durasiadzan);
   Serial.print("Correction: ");
   Serial.println(config.Correction);
-#endif
+#endif*/
 
 Serial.print("PWD=");
 Serial.println(password);

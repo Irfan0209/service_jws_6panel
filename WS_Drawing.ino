@@ -108,7 +108,6 @@ void nextShowState()
     case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:     show = ANIM_CLOCK; break;
   }
-  Serial.println("jumat:" + String(JUMAT));
 }
 
 void Center(int8_t x,int8_t y){
@@ -444,9 +443,6 @@ void drawAzzan()
 
 void runn(const char* msg, uint8_t speed, uint8_t fontt)
 {
-  //if(adzan) return;
-  
-  
   static uint32_t x = 0;
   static uint32_t fullScroll = 0;
   static uint32_t lastMs = 0;
