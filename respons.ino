@@ -2,7 +2,6 @@
 
 bool cekPersiapanSemuaAdzan(RtcDateTime now) {
   uint16_t menitSekarang = (now.Hour() * 60) + now.Minute();
-  constexpr uint8_t durasiPersiapan = 1;
 
   // Lakukan pemindaian ke 5 waktu sholat tersebut
   for (uint8_t i = 0; i < 5; i++) {
@@ -18,7 +17,7 @@ bool cekPersiapanSemuaAdzan(RtcDateTime now) {
       uint16_t selisihMenit = menitTarget - menitSekarang;
       
       // Jika selisihnya kurang dari atau sama dengan durasi persiapan (misal 15 menit)
-      if (selisihMenit <= durasiPersiapan) {
+      if (selisihMenit <= config.durasiPraiqomah) {
         return true; // Beri sinyal untuk mulai menampilkan teks berjalan!
       }
     }

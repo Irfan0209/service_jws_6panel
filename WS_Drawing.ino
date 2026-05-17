@@ -105,10 +105,7 @@ void nextShowState()
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
     case ANIM_TEXT5:   show = ANIM_SHOLAT; break;
-    //case ANIM_JUMAT1:  (JUMAT==1)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
-    //case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:     show = ANIM_CLOCK; break;
-   // case ANIM_ADZAN:    show = ANIM_IQOMAH1; break;
   }
 }
 
@@ -437,14 +434,14 @@ void drawAzzan()
     
     if ((Tmr - lsRn) > 1500 && (ct > limit))
     {
-        show = ANIM_IQOMAH1;
+        show = ANIM_IQOMAH;
         ct = 0;
         Buzzer(0);
-        // reset_x = 1;
+        reset_x = 1;
     }
 }
 
-void runn(const char* msg, uint8_t speed, uint8_t fontt)
+/*void runn(const char* msg, uint8_t speed, uint8_t fontt)
 {
   static uint32_t x = 0;
   static uint32_t fullScroll = 0;
@@ -489,18 +486,19 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
     DWidth - x,0,msg
   );
   DoSwap = true;
-}
+}*/
 
 void nextShowStateRun()
 { 
   switch(show){
-    case ANIM_PREIQOMAH1:    show = ANIM_PREIQOMAH2; break;
-    case ANIM_PREIQOMAH2:   show = ANIM_PREIQOMAH1; break;
+    case ANIM_PREIQOMAH1:  reset_x = 1; show = ANIM_PREIQOMAH2; break;
+    case ANIM_PREIQOMAH2:  reset_x = 1; show = ANIM_PREIQOMAH1; break;
 
-    case ANIM_JUMAT1:    show = ANIM_JUMAT2; break;
-    case ANIM_JUMAT2:   show = ANIM_JUMAT1; break;
+    case ANIM_JUMAT1:   reset_x = 1; show = ANIM_JUMAT2; break;
+    case ANIM_JUMAT2:   reset_x = 1; show = ANIM_JUMAT1; break;
     
   }
+ 
 }
 
 void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {

@@ -81,6 +81,7 @@ struct Config {
   uint8_t    jumatMulaiMenit;
   uint8_t    jumatSelesaiJam;
   uint8_t    jumatSelesaiMenit;
+  uint8_t    durasiPraiqomah;
   char text1[250];
   char text2[250];
   char text3[250];
@@ -102,7 +103,7 @@ uint8_t    DHeight       = Disp.height();
 // Variabel untuk waktu, tanggal, teks berjalan, tampilan ,dan kecerahan
 bool       adzan         = 0;
 bool       JUMAT         = 0;
-bool       IQOMAH        = 0;
+bool       PRE_IQOMAH        = 0;
 int8_t     sholatNow     = -1;
 bool       reset_x       = 0; 
 
@@ -210,7 +211,7 @@ Show show = ANIM_CLOCK;
 #define ADDR_SPEEDTXJM1     2585   // 2
 #define ADDR_SPEEDTXJM2     2587   // 2
 
-//#define ADDR_TESTPANEL    1573   // 1
+#define ADDR_TIMEPRAIQOMAH  2589   // 1
 
 // Menggunakan const char* (Array of Character) menggantikan objek String
 void saveStringToEEPROM(int startAddr, const char* data, int maxLength) {
@@ -703,6 +704,11 @@ void getData(const char* data) {
         }
       }
     } 
+
+     else if (key_len == 4 && strncmp(data, "tmiq", 4) == 0) {
+      config.durasiPraiqomah = atoi(ptr);
+      saveIntToEEPROM(ADDR_TIMEPRAIQOMAH, config.durasiPraiqomah);
+    } 
     
     else if (key_len == 4 && strncmp(data, "mode", 4) == 0) {
       config.stateMode = atoi(ptr);
@@ -826,6 +832,8 @@ void loadFromEEPROM() {
   config.speedTextJumat1 = EEPROM.read(ADDR_SPEEDTXJM1);
 
   config.speedTextJumat2 = EEPROM.read(ADDR_SPEEDTXJM2);
+
+  config.durasiPraiqomah = EEPROM.read(ADDR_TIMEPRAIQOMAH);
 
   
 
@@ -987,6 +995,8 @@ void loadFromEEPROM() {
   Serial.println(config.jumatSelesaiJam);
   Serial.print("jumatSelesaiMenit: ");
   Serial.println(config.jumatSelesaiMenit);
+  Serial.print("durasi pra iqomah: ");
+  Serial.println(config.durasiPraiqomah);
   Serial.print("mode: ");
   Serial.println(config.stateMode);
   Serial.print("Password: ");
