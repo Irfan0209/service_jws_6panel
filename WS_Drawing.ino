@@ -25,6 +25,7 @@ void dwMrq(const char* msg, uint8_t Speed, uint8_t dDT, uint8_t fontt) {
     x = 0; 
     reset_x = 0; 
     fullScroll = 0;
+    return;
   }      
 
   uint32_t Tmr = millis();
@@ -107,6 +108,7 @@ void nextShowState()
     case ANIM_JUMAT1:  (JUMAT==1)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
     case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:     show = ANIM_CLOCK; break;
+   // case ANIM_ADZAN:    show = ANIM_IQOMAH1; break;
   }
 }
 
@@ -438,6 +440,7 @@ void drawAzzan()
         show = ANIM_IQOMAH1;
         ct = 0;
         Buzzer(0);
+        // reset_x = 1;
     }
 }
 
@@ -452,6 +455,7 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
     fullScroll = 0;
     lastMs = 0;
     reset_x = 0;
+    return;
   }
   
   // ====== Pesan baru → reset animasi ======
@@ -496,6 +500,86 @@ void nextShowStateRun()
   }
 }
 
+void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {
+  static uint16_t x = 0;
+  static uint16_t textW = 0;
+  static uint16_t fullScroll = 0;
+  static bool isScrolling = false;
+  //static uint32_t diamTimer = 0; // Timer khusus untuk teks diam
+  
+  // Reset trigger dari luar (saat ganti menu/tampilan)
+  if (reset_x != 0) { 
+    x = 0; 
+    textW = 0;
+    reset_x = 0; 
+    return;
+  }
+
+  uint32_t Tmr = millis();
+  static uint32_t lss = 0;
+
+  // Render frame setiap 45ms (Kecepatan standar agar smooth)
+  if ((Tmr - lss) > speed) {
+    lss = Tmr;
+
+    fType(fontt);
+
+    // ==============================================================
+    // 1. OPTIMASI: Hitung lebar teks SEKALI SAJA di awal
+    // ==============================================================
+    if (textW == 0) {
+      textW = Disp.textWidth(msg);
+      Serial.println(textW);
+      
+      // Cek apakah lebar teks melebihi lebar layar 6 Panel (DWidth)
+      if (textW > DWidth) {
+        isScrolling = true;
+        fullScroll = textW + DWidth;
+      } else {
+        isScrolling = false;
+        //diamTimer = Tmr; // Mulai argon timer untuk durasi teks diam
+      }
+    }
+
+    // ==============================================================
+    // 2. LOGIKA TAMPILAN (Diam vs Berjalan)
+    // ==============================================================
+    if (isScrolling) {
+      // --- MODE BERJALAN (Lebih dari 6 Panel) ---
+      if (x < fullScroll) {
+        ++x;
+      } else {
+        x = 0; 
+        textW = 0;
+        fullScroll = 0;
+        
+        // Panggil fungsi ganti tampilan di sini jika diperlukan
+        // nextShowState(); 
+        return;
+      }
+      
+      // Render teks berjalan, posisi Y = 4 (tengah vertikal)
+      Disp.drawText(DWidth - x, 4, msg);
+      
+    } else {
+      // --- MODE DIAM (Kurang dari atau sama dengan 6 Panel) ---
+      dwCtr(0, 4, msg);
+      
+      // PENTING: Karena teks diam tidak punya titik akhir scroll,
+      // kita harus memberi batasan waktu tampil (misal: 5000 ms / 5 detik)
+//      if (Tmr - diamTimer > 5000) {
+//        textW = 0;
+//        
+//        // Panggil fungsi ganti tampilan di sini jika diperlukan
+//        // nextShowState(); 
+//        return;
+//      }
+    }
+
+    DoSwap = true;
+  }
+}
+
 void drawIqomah()  // Countdown Iqomah (9 menit)
 {  
     static uint32_t lsRn = 0;
@@ -512,8 +596,8 @@ void drawIqomah()  // Countdown Iqomah (9 menit)
 
    // if ((ct & 1) == 0) {  // Gunakan bitwise untuk optimasi modulo 2
     fType(1);
-    dwCtr(0, 8, locBuff);
-    //DoSwap = true;
+    dwCtr(0, 4, locBuff);
+    DoSwap = true;
     
     if (now - lsRn > 1000) 
     {   
@@ -529,6 +613,7 @@ void drawIqomah()  // Countdown Iqomah (9 menit)
     {
         ct = 0;
         Buzzer(0);
+        reset_x = 1;
         show = ANIM_BLINK;
     }    
 }

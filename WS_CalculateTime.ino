@@ -1,6 +1,16 @@
 
 //======================== new program =========================//
 void islam() {
+  static uint32_t lastRtcRead = 0;
+  static RtcDateTime waktuSekarang;
+  
+  if (millis() - lastRtcRead > 1000) {
+    waktuSekarang = Rtc.GetDateTime();
+    lastRtcRead = millis();
+  }
+
+  if(cekPersiapanSemuaAdzan(waktuSekarang) && !adzan){ show = ANIM_PREIQOMAH ; }
+  
   RtcDateTime now = Rtc.GetDateTime();
   
   cekJadwalPanel(now.Hour(), now.Minute());
@@ -29,7 +39,7 @@ void islam() {
   // --- EKSEKUSI RUMUS HANYA JIKA FLAG AKTIF ---
   if(butuhHitungJadwal){
     // Menggunakan perulangan for untuk eksekusi 2 kali
-    for(int i = 0; i < 2; i++) {
+    for(uint8_t i = 0; i < 2; i++) {
       JWS.Update(config.zonawaktu, config.latitude, config.longitude, config.altitude, now.Year(), now.Month(), now.Day());
       JWS.setIkhtiSu = dataIhty[0];
       JWS.setIkhtiDzu = dataIhty[1];

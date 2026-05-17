@@ -102,6 +102,7 @@ uint8_t    DHeight       = Disp.height();
 // Variabel untuk waktu, tanggal, teks berjalan, tampilan ,dan kecerahan
 bool       adzan         = 0;
 bool       JUMAT         = 0;
+bool       IQOMAH        = 0;
 int8_t     sholatNow     = -1;
 bool       reset_x       = 0; 
 
@@ -113,7 +114,7 @@ bool       stateBuzzWar    = 0;
 bool       butuhHitungJadwal = true;
 bool       DoSwap          = false;
 bool       panelState = false; // false = OFF, true = ON
-
+bool       statusTeks = false;
 /*============== end ================*/
 
 enum Show{
@@ -133,7 +134,8 @@ enum Show{
   ANIM_IQOMAH2,
   ANIM_BLINK,
   ANIM_TEST,
-  ANIM_COUNTER
+  ANIM_COUNTER,
+  ANIM_PREIQOMAH
 };
 Show show = ANIM_CLOCK;
 
@@ -372,12 +374,13 @@ void loop()
     break;
 
     case ANIM_JUMAT1 :
-        dwMrq(config.textJumat1,config.speedTextJumat1,2,1);
+        //dwMrq(config.textJumat1,config.speedTextJumat1,2,1);
+        drawSmartText(config.textJumat1,config.speedTextJumat1,1);
     break;
 
-    case ANIM_JUMAT2 :
-        dwMrq(config.textJumat2,config.speedTextJumat2,1,1);
-    break;
+//    case ANIM_JUMAT2 :
+//        dwMrq(config.textJumat2,config.speedTextJumat2,1,1);
+//    break;
 
     case ANIM_TEXT1 :
         dwMrq(config.text1,config.speedText1,1,1);
@@ -407,20 +410,24 @@ void loop()
         drawTestPanel();
     break;
 
+    case ANIM_PREIQOMAH :
+        drawSmartText(config.textIqomah1,config.speedTextIqomah1,1);
+    break;
+
     case ANIM_ADZAN :
       dwMrq(AZZAN(),15,3,5);
       drawAzzan();
     break;
 
     case ANIM_IQOMAH1 :
-      runn(config.textIqomah1,config.speedTextIqomah1,1);
+      //runn(config.textIqomah1,config.speedTextIqomah1,1);
       drawIqomah();
     break;
 
-    case ANIM_IQOMAH2 :
-      runn(config.textIqomah2,config.speedTextIqomah2,1);
-      drawIqomah();
-    break;
+//    case ANIM_IQOMAH2 :
+//      //runn(config.textIqomah2,config.speedTextIqomah2,1);
+//      drawIqomah();
+//    break;
 
     case ANIM_BLINK :
       blinkBlock();
@@ -513,7 +520,7 @@ void getData(const char* data) {
     else if (key_len == 4 && strncmp(data, "name", 4) == 0) {
       strncpy(config.name, ptr, 250);
       config.name[250] = '\0'; // Pastikan aman (tidak lebih dari 250 char)
-      Serial.println(config.name);
+      //Serial.println(config.name);
       saveStringToEEPROM(ADDR_NAME, config.name, 250);
       Buzzer(1); delay(500); ESP.restart();
     } 
