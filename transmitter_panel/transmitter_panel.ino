@@ -134,10 +134,40 @@ void handleSetTime() {
     server.send(200, "text/plain", "OK");//"Kecepatan info 2 berhasil diupdate");
     return;
   }
+  if (server.hasArg("Sptxiq1")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "Sptxiq1=%s", server.arg("Sptxiq1").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain", "OK");//"Kecepatan info 2 berhasil diupdate");
+    return;
+  }
+  if (server.hasArg("Sptxiq2")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "Sptxiq2=%s", server.arg("Sptxiq2").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain", "OK");//"Kecepatan info 2 berhasil diupdate");
+    return;
+  }
+  if (server.hasArg("Sptxjm1")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "Sptxjm1=%s", server.arg("Sptxjm1").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain", "OK");//"Kecepatan info 2 berhasil diupdate");
+    return;
+  }
+  if (server.hasArg("Sptxjm2")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "Sptxjm2=%s", server.arg("Sptxjm2").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain", "OK");//"Kecepatan info 2 berhasil diupdate");
+    return;
+  }
   if (server.hasArg("Spnm")) {
     snprintf(dataBuffer, sizeof(dataBuffer), "Spnm=%s", server.arg("Spnm").c_str());
     getData(dataBuffer);
     server.send(200, "text/plain", "OK");//"Kecepatan nama berhasil diupdate");
+    return;
+  }
+  if (server.hasArg("tmiq")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "tmiq=%s", server.arg("tmiq").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain", "OK");//"Kecepatan info 2 berhasil diupdate");
     return;
   }
   if (server.hasArg("Iq")) {
@@ -229,6 +259,18 @@ void handleSetTime() {
     snprintf(dataBuffer, sizeof(dataBuffer), "alarmOff=%s", server.arg("alarmOff").c_str());
     getData(dataBuffer);
     server.send(200, "text/plain","OK");// (stateBuzzer) ? "Suara Diaktifkan" : "Suara Dimatikan");
+    return;
+  }
+  if (server.hasArg("jumatOn")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "jumatOn=%s", server.arg("jumatOn").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain","OK");// 
+    return;
+  }
+  if (server.hasArg("jumatOff")) {
+    snprintf(dataBuffer, sizeof(dataBuffer), "jumatOff=%s", server.arg("jumatOff").c_str());
+    getData(dataBuffer);
+    server.send(200, "text/plain","OK");// 
     return;
   }
   if (server.hasArg("mode")) {
