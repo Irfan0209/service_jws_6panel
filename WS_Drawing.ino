@@ -104,9 +104,9 @@ void nextShowState()
     case ANIM_TEXT2:   show = ANIM_TEXT3; break;
     case ANIM_TEXT3:   show = ANIM_TEXT4; break;
     case ANIM_TEXT4:   show = ANIM_TEXT5; break;
-    case ANIM_TEXT5:   (JUMAT==1)?show = ANIM_JUMAT1 : show = ANIM_SHOLAT; break;
-    case ANIM_JUMAT1:  (JUMAT==1)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
-    case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
+    case ANIM_TEXT5:   show = ANIM_SHOLAT; break;
+    //case ANIM_JUMAT1:  (JUMAT==1)?show = ANIM_JUMAT2 : show = ANIM_SHOLAT; break;
+    //case ANIM_JUMAT2:   show = ANIM_SHOLAT; break;
     case ANIM_NAME:     show = ANIM_CLOCK; break;
    // case ANIM_ADZAN:    show = ANIM_IQOMAH1; break;
   }
@@ -494,18 +494,28 @@ void runn(const char* msg, uint8_t speed, uint8_t fontt)
 void nextShowStateRun()
 { 
   switch(show){
-    case ANIM_IQOMAH1:    show = ANIM_IQOMAH2; break;
-    case ANIM_IQOMAH2:   show = ANIM_IQOMAH1; break;
+    case ANIM_PREIQOMAH1:    show = ANIM_PREIQOMAH2; break;
+    case ANIM_PREIQOMAH2:   show = ANIM_PREIQOMAH1; break;
+
+    case ANIM_JUMAT1:    show = ANIM_JUMAT2; break;
+    case ANIM_JUMAT2:   show = ANIM_JUMAT1; break;
     
   }
 }
 
 void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {
+  if(adzan) return;
+
+  if (msg == NULL || msg[0] == '\0') {
+    nextShowStateRun(); // Langsung baca state selanjutnya
+    return;             // Keluar dari fungsi agar tidak membuang CPU
+  }
+  
   static uint16_t x = 0;
   static uint16_t textW = 0;
   static uint16_t fullScroll = 0;
   static bool isScrolling = false;
-  //static uint32_t diamTimer = 0; // Timer khusus untuk teks diam
+  static uint32_t diamTimer = 0; // Timer khusus untuk teks diam
   
   // Reset trigger dari luar (saat ganti menu/tampilan)
   if (reset_x != 0) { 
@@ -529,7 +539,6 @@ void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {
     // ==============================================================
     if (textW == 0) {
       textW = Disp.textWidth(msg);
-      Serial.println(textW);
       
       // Cek apakah lebar teks melebihi lebar layar 6 Panel (DWidth)
       if (textW > DWidth) {
@@ -537,7 +546,7 @@ void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {
         fullScroll = textW + DWidth;
       } else {
         isScrolling = false;
-        //diamTimer = Tmr; // Mulai argon timer untuk durasi teks diam
+        diamTimer = Tmr; // Mulai argon timer untuk durasi teks diam
       }
     }
 
@@ -554,7 +563,7 @@ void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {
         fullScroll = 0;
         
         // Panggil fungsi ganti tampilan di sini jika diperlukan
-        // nextShowState(); 
+        nextShowStateRun(); 
         return;
       }
       
@@ -567,13 +576,13 @@ void drawSmartText(const char* msg, uint8_t speed,uint8_t fontt) {
       
       // PENTING: Karena teks diam tidak punya titik akhir scroll,
       // kita harus memberi batasan waktu tampil (misal: 5000 ms / 5 detik)
-//      if (Tmr - diamTimer > 5000) {
-//        textW = 0;
-//        
-//        // Panggil fungsi ganti tampilan di sini jika diperlukan
-//        // nextShowState(); 
-//        return;
-//      }
+      if (Tmr - diamTimer > 5000) {
+        textW = 0;
+        
+        // Panggil fungsi ganti tampilan di sini jika diperlukan
+        nextShowStateRun(); 
+        return;
+      }
     }
 
     DoSwap = true;

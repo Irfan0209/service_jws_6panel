@@ -130,12 +130,13 @@ enum Show{
   ANIM_JUMAT1,
   ANIM_JUMAT2,
   ANIM_ADZAN,
-  ANIM_IQOMAH1,
-  ANIM_IQOMAH2,
+  ANIM_IQOMAH,
+ // ANIM_IQOMAH2,
   ANIM_BLINK,
   ANIM_TEST,
   ANIM_COUNTER,
-  ANIM_PREIQOMAH
+  ANIM_PREIQOMAH1,
+  ANIM_PREIQOMAH2
 };
 Show show = ANIM_CLOCK;
 
@@ -359,8 +360,8 @@ void loop()
   check();
   islam();
   Disp.clear();
-  
-  switch(show){
+ 
+   switch(show){
     case ANIM_CLOCK : 
        jamCenter();
     break;
@@ -372,15 +373,6 @@ void loop()
     case ANIM_SHOLAT :
         drawJadwalSholat();
     break;
-
-    case ANIM_JUMAT1 :
-        //dwMrq(config.textJumat1,config.speedTextJumat1,2,1);
-        drawSmartText(config.textJumat1,config.speedTextJumat1,1);
-    break;
-
-//    case ANIM_JUMAT2 :
-//        dwMrq(config.textJumat2,config.speedTextJumat2,1,1);
-//    break;
 
     case ANIM_TEXT1 :
         dwMrq(config.text1,config.speedText1,1,1);
@@ -410,8 +402,20 @@ void loop()
         drawTestPanel();
     break;
 
-    case ANIM_PREIQOMAH :
+    case ANIM_PREIQOMAH1 :
         drawSmartText(config.textIqomah1,config.speedTextIqomah1,1);
+    break;
+
+    case ANIM_PREIQOMAH2 :
+        drawSmartText(config.textIqomah2,config.speedTextIqomah2,1);
+    break;
+
+    case ANIM_JUMAT1 :
+        drawSmartText(config.textJumat1,config.speedTextJumat1,1);
+    break;
+
+    case ANIM_JUMAT2 :
+        drawSmartText(config.textJumat2,config.speedTextJumat2,1);
     break;
 
     case ANIM_ADZAN :
@@ -419,20 +423,15 @@ void loop()
       drawAzzan();
     break;
 
-    case ANIM_IQOMAH1 :
-      //runn(config.textIqomah1,config.speedTextIqomah1,1);
+    case ANIM_IQOMAH :
       drawIqomah();
     break;
-
-//    case ANIM_IQOMAH2 :
-//      //runn(config.textIqomah2,config.speedTextIqomah2,1);
-//      drawIqomah();
-//    break;
 
     case ANIM_BLINK :
       blinkBlock();
     break;
   };
+  
 
     buzzerWarning(stateBuzzWar);
     yield();

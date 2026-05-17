@@ -14,7 +14,7 @@ void islam() {
   RtcDateTime now = Rtc.GetDateTime();
   
   cekJadwalPanel(now.Hour(), now.Minute());
-  JUMAT = cekJadwalJumat(now.Hour(), now.Minute(),now.DayOfWeek());
+  if(cekJadwalJumat(now.Hour(), now.Minute(),now.DayOfWeek())){ show = ANIM_JUMAT; }
 
   static int8_t lastHalfPlay = -1;
 
